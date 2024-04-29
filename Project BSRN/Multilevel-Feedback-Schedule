@@ -1,14 +1,26 @@
-#Einlesen der Prozesse über Eingabedatei
+#Bibliothek
 import argparse
 parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
 parser.add_argument('-processlistfile', type=str, required=True,help ='Geben Sie den Pfad zur Prozessliste an')
 args = parser.parse_args()
 process_list_file = args.processlistfile
 
+#Dictionary besser als Klasse, um Prozess darzustellen?
+def lese_prozess_list(dateiname):
+    prozesse = []
+    with open(dateiname, 'r') as file:
+        for line in file:
+            prozess = {
+                'name': name,
+                'cpu_time': int(cpu_zeit),
+                'ankunftszeit': int(ankunftszeit)
+            }
+
+#Prozesse aus der Datei lesen
+prozess_liste = read_process_list(process_list_file)
 
 
 
-
-#Datenstrukturen
-anzahlWS = int('Gebe die Anzahl der Warteschlangen an')
+#Benutzer nach der Anzahl der Warteschlangen und Zeitquanten fragen
+anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
 zeitquanten = int('Gebe das jeweilige Zeitquantum an')
