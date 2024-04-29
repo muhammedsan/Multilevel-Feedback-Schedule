@@ -10,15 +10,20 @@ def lese_prozess_list(dateiname):
     prozesse = []
     with open(dateiname, 'r') as file:
         for line in file:
-            prozess = {
-                'name': name,
-                'cpu_time': int(cpu_zeit),
-                'ankunftszeit': int(ankunftszeit)
+            parts = line.strip().split('')
+            if len(parts)== 3: #Überprüfung der Zeilendaten
+            
+            #Dictionary 
+              prozess = {
+                'name': parts[0],
+                'cpu_time': int(parts[1]),
+                'ankunftszeit': int(parts[2])
             }
+            prozesse.append(prozess)
+            return 
 
 #Prozesse aus der Datei lesen
-prozess_liste = read_process_list(process_list_file)
-
+prozess_liste = lese_prozess_list(process_list_file)
 
 
 #Benutzer nach der Anzahl der Warteschlangen und Zeitquanten fragen
