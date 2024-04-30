@@ -33,7 +33,10 @@ prozess_liste = lese_prozess_list(process_list_file)
 
 #Benutzer nach der Anzahl der Warteschlangen und Zeitquanten fragen
 anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
-zeitquanten = int('Gebe das jeweilige Zeitquantum an')
+zeitquanten = []
+for i in range(anzahlWS):
+   zeitquanten.append(int(input(f'Gebe das Zeitquantum für Warteschlange {i+1} an:')))
+print('Zeitquantum: ',zeitquanten)
 
 
 #Gantt-Diagramm
