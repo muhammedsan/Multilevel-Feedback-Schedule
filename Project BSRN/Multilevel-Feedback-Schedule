@@ -1,5 +1,10 @@
 #Bibliothek
 import argparse
+
+#Bibliothek für Gantt-Diagramm
+#Pyplot durch "as pyp" in pyp umbenannt
+import matplotlib.pyplot as pyp
+
 parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
 parser.add_argument('-processlistfile', type=str, required=True,help ='Geben Sie den Pfad zur Prozessliste an')
 args = parser.parse_args()
@@ -29,3 +34,23 @@ prozess_liste = lese_prozess_list(process_list_file)
 #Benutzer nach der Anzahl der Warteschlangen und Zeitquanten fragen
 anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
 zeitquanten = int('Gebe das jeweilige Zeitquantum an')
+
+
+#Gantt-Diagramm
+#(man kann noch schriftgröse und platzierung der Titel einstellen)
+fig, achse = pyp.subplots()
+
+#Wert für breite notwendig 
+for i, prozess in enumerate(prozess_liste) :
+    achse.barh(prozess, width = cpu_zeit, left = ankunftszeit, color = "green")
+
+#Limiter für x und y Achse muss gesetzt werden
+pyp.xlim()
+pyp.xlabel("Zeit in Sekunden")
+
+pyp.ylim()
+pyp.ylabel("Prozesse")
+
+pyp.title("Gantt-Diagramm der Prozessverarbeitung")
+
+pyp.show()
