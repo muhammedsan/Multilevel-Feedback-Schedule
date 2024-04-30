@@ -40,9 +40,9 @@ zeitquanten = int('Gebe das jeweilige Zeitquantum an')
 #(man kann noch schriftgröse und platzierung der Titel einstellen)
 fig, achse = pyp.subplots()
 
-#Wert für breite notwendig 
+#Wert für breite notwendig -> So machbar?
 for i, prozess in enumerate(prozess_liste) :
-    achse.barh(prozess, width = cpu_zeit, left = ankunftszeit, color = "green")
+    achse.barh(prozess, width = prozess('cpu_time'), left = prozess('ankunftszeit'), color = "green")
 
 #Limiter für x und y Achse muss gesetzt werden
 pyp.xlim()
