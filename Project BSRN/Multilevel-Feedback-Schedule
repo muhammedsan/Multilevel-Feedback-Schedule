@@ -9,13 +9,18 @@ parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
 parser.add_argument('-processlistfile', type=str, required=True,help ='Geben Sie den Pfad zur Prozessliste an')
 args = parser.parse_args()
 process_list_file = args.processlistfile
+print(f'Verwendeter Dateipfad: {process_List_file}')
 
-#Dictionary besser als Klasse, um Prozess darzustellen?
+
+
+
+#
 def lese_prozess_list(dateiname):
     prozesse = []
+try:
     with open(dateiname, 'r') as file:
         for line in file:
-            parts = line.strip().split('')
+            parts = line.strip().split(',')
             if len(parts)== 3: #Überprüfung der Zeilendaten
             
             #Dictionary 
@@ -24,8 +29,18 @@ def lese_prozess_list(dateiname):
                 'cpu_time': int(parts[1]),
                 'ankunftszeit': int(parts[2])
             }
-            prozesse.append(prozess)
-            return 
+        prozesse.append(prozess)
+except FileNotFoundError:
+    print(f'Fehler: Die Datei {dateiname} wurde nicht gefunden.')
+    return []
+except Exception as e:
+    print(f'Ein Fehler ist aufgetreten: {e}')
+    return []
+return prozesse   
+
+
+
+      
 
 #Prozesse aus der Datei lesen
 prozess_liste = lese_prozess_list(process_list_file)
