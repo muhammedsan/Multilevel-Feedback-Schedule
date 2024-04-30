@@ -1,49 +1,50 @@
-#Bibliothek
+# Bibliothek
 import argparse
 
-#Bibliothek für Gantt-Diagramm
-#Pyplot durch "as pyp" in pyp umbenannt
+# Bibliothek für Gantt-Diagramm
+# Pyplot durch "as pyp" in pyp umbenannt
 import matplotlib.pyplot as pyp
 
+# Parser einrichten
 parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
 parser.add_argument('-processlistfile', type=str, required=True,help ='Geben Sie den Pfad zur Prozessliste an')
 args = parser.parse_args()
+
 process_list_file = args.processlistfile
-print(f'Verwendeter Dateipfad: {process_List_file}')
+
+process_list_file = args.processlistfile
+print(f'Verwendeter Dateipfad: {process_list_file}')
 
 
-
-
-#
+#Methode zum Einlesen der Prozesse
 def lese_prozess_list(dateiname):
     prozesse = []
-try:
-    with open(dateiname, 'r') as file:
-        for line in file:
-            parts = line.strip().split(',')
-            if len(parts)== 3: #Überprüfung der Zeilendaten
-            
-            #Dictionary 
-              prozess = {
-                'name': parts[0],
-                'cpu_time': int(parts[1]),
-                'ankunftszeit': int(parts[2])
-            }
-        prozesse.append(prozess)
-except FileNotFoundError:
-    print(f'Fehler: Die Datei {dateiname} wurde nicht gefunden.')
-    return []
-except Exception as e:
-    print(f'Ein Fehler ist aufgetreten: {e}')
-    return []
-return prozesse   
+    try:
+       with open(dateiname, 'r') as file:
+           for line in file:
+               parts = line.strip().split(',')
+               if len(parts)== 3:  
+                       
+                   #Dictionary 
+                   prozess = {
+                       'name': parts[0],
+                       'cpu_time': int(parts[1]),
+                       'ankunftszeit': int(parts[2])
+                }
+               prozesse.append(prozess)
+    except FileNotFoundError:
+        print(f'Fehler: Die Datei {dateiname} wurde nicht gefunden.')
+        return []
+    except Exception as e:
+        print(f'Ein Fehler ist aufgetreten: {e}')
+        return []
+    return prozesse   
 
 
-
-      
 
 #Prozesse aus der Datei lesen
 prozess_liste = lese_prozess_list(process_list_file)
+
 
 
 #Benutzer nach der Anzahl der Warteschlangen und Zeitquanten fragen
