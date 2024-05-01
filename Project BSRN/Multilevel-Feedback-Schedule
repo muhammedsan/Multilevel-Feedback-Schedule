@@ -70,7 +70,7 @@ Wartezeiten = []
 
 #Laufzeiten in der Liste abspeichern 
 for prozess in prozess_liste :
-    lz = int(prozess['cpu_time'])
+    lz = prozess['cpu_time']
     Laufzeiten.append(lz)
     
     Wartezeiten.append(0)
