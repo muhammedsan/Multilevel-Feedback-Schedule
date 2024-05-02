@@ -31,7 +31,6 @@ print('Anzahl der Warteschlangen:', anzahlWS)
 print('Zeitquantum: ',zeitquanten)
 print(f'Verwendeter Dateipfad: {process_list_file}')
 
-
 #Methode zum Einlesen der Prozesse
 def lese_prozess_list(dateiname):
     prozesse = []
@@ -39,9 +38,6 @@ def lese_prozess_list(dateiname):
        with open(dateiname, 'r') as file:
            for line in file:
                parts = line.strip().split(',')
-               
-               #"prozess" initialisieren, da sonst eine Fehlermeldung entsteht
-               prozess = {}
                
                if len(parts)== 3:  
                        
@@ -65,19 +61,19 @@ def lese_prozess_list(dateiname):
 prozess_liste = lese_prozess_list(process_list_file)
 
 #Erstellen von leeren Listen für Laufzeit und Wartezeit
-Laufzeiten = []
-Wartezeiten = []
+laufzeiten = []
+wartezeiten = []
 
 #Laufzeiten in der Liste abspeichern 
 for prozess in prozess_liste :
     lz = prozess['cpu_time']
-    Laufzeiten.append(lz)
+    laufzeiten.append(lz)
     
-    Wartezeiten.append(0)
+    wartezeiten.append(0)
     
 #Ausgabe der Laufzeit und Wartezeit 
 for i, prozesse in enumerate(prozess_liste) :
-    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {Laufzeiten[i]}, Wartezeit = {Wartezeiten[i]}')
+    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
 
 #Gantt-Diagramm
 #(man kann noch schriftgröse und platzierung der Titel einstellen)
