@@ -61,8 +61,8 @@ def lese_prozess_list(dateiname):
 prozess_liste = lese_prozess_list(process_list_file)
 
 # Erstellen von leeren Listen für Laufzeit und Wartezeit
-Laufzeiten = []
-Wartezeiten = []
+laufzeiten = []
+wartezeiten = []
 
 # Laufzeiten in der Liste abspeichern 
 for prozess in prozess_liste :
@@ -73,17 +73,17 @@ for prozess in prozess_liste :
     
 # Ausgabe der Laufzeit und Wartezeit 
 for i, prozesse in enumerate(prozess_liste) :
-    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {Laufzeiten[i]}, Wartezeit = {Wartezeiten[i]}')
+    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
 
 # Gantt-Diagramm
 # (man kann noch schriftgröse und platzierung der Titel einstellen)
 fig, achse = pyp.subplots()
 
-#Wert für breite notwendig -> So machbar?
+# Wert für breite notwendig -> So machbar?
 for i, prozess in enumerate(prozess_liste) :
     achse.barh(prozess, width = prozess('cpu_time'), left = prozess('ankunftszeit'), color = "green")
 
-#Limiter für x und y Achse muss gesetzt werden
+# Limiter für x und y Achse muss gesetzt werden
 pyp.xlim()
 pyp.xlabel("Zeit in Sekunden")
 
