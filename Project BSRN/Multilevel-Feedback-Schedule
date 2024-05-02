@@ -1,6 +1,6 @@
 # Bibliothek
 import argparse
-
+import logging
 # Bibliothek für Gantt-Diagramm
 # Pyplot durch "as pyp" in pyp umbenannt
 import matplotlib.pyplot as pyp
@@ -106,3 +106,18 @@ pyp.ylabel("Prozesse")
 pyp.title("Gantt-Diagramm der Prozessverarbeitung")
 
 pyp.show()
+
+# Ausgabedatei/ Parser
+parser=argparse.ArgumentParser(description='Ausgabedatei: Name& Pfad')
+parser.add_argument('dateiname',type=str, required=False, help='Geben Sie den Namen für die Ausgabedatei an')
+parser.add_argument('dateipfad',type=str, help='Geben Sie den Pfad für die Ausgabedatei an')
+args = parser.parse_args
+
+# Öffnen der Ausgabedatei 
+with open(args.dateiname, 'w') as f: 
+   # für später relevant(Laufzeit, Durchschnitt etc.)
+   f.write("")
+print(f"Name der Ausgabedatei: {args.dateiname}")
+print(f"Pfad der Ausgabedatei: {args.dateipfad}")
+
+
