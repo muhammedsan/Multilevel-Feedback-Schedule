@@ -1,6 +1,8 @@
-# Bibliothek
 import argparse
+
+# Import des Logging Moduls für die Dokumentation
 import logging
+
 # Bibliothek für Gantt-Diagramm
 # Pyplot durch "as pyp" in pyp umbenannt
 import matplotlib.pyplot as pyp
@@ -10,7 +12,7 @@ parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
 parser.add_argument('-processlistfile', type=str, required=True,help ='Geben Sie den Pfad zur Prozessliste an')
 parser.add_argument('-warteschlangen' , type=int, required=False, help = 'Anzahl der Warteschlangen')
 parser.add_argument('-quantum', type=int, nargs='+', required=False, help='Liste von Zeitquanten für jede Warteschlange')
-args = parser.parse_args()
+args = parser.parse_args 
 
 # Dateipfad aus den Argumenten auslesen
 process_list_file = args.processlistfile
@@ -94,7 +96,7 @@ fig, achse = pyp.subplots()
 
 # Wert für breite notwendig -> So machbar?
 for i, prozess in enumerate(prozess_liste) :
-    achse.barh(prozess, width = prozess('cpu_time'), left = prozess('ankunftszeit'), color = "green")
+    achse.barh(prozess, width = prozess['cpu_time'], left = prozess['ankunftszeit'], color = "green")
 
 # Limiter für x und y Achse muss gesetzt werden
 pyp.xlim()
@@ -111,7 +113,15 @@ pyp.show()
 parser=argparse.ArgumentParser(description='Ausgabedatei: Name& Pfad')
 parser.add_argument('dateiname',type=str, required=False, help='Geben Sie den Namen für die Ausgabedatei an')
 parser.add_argument('dateipfad',type=str, help='Geben Sie den Pfad für die Ausgabedatei an')
+
+# Logdatei/ Parser
+parser.add_argument('logdatei', type=str,required=True,help='Geben Sie den Namen der Logdatei an' )
+parser.add_argument('logdateipfad',type=str, required=True, help='Geben Sie einen Pfad für die Logdatei an')
 args = parser.parse_args
+
+# Grundkonfiguration logdatei
+logging.basicConfig(filename=args.logdatei, level=logging.INFO, format='%(asctime)s - %(message)s')
+
 
 # Öffnen der Ausgabedatei 
 with open(args.dateiname, 'w') as f: 
