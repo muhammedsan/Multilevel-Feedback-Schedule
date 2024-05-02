@@ -15,33 +15,37 @@ args = parser.parse_args()
 # Dateipfad aus den Argumenten auslesen
 process_list_file = args.processlistfile
 
-# per Kommandozeilenargumente, wenn vorhanden
+#per Kommandozeilenargumente, wenn vorhanden
 if args.warteschlangen is not None and args.quantum is not None:
      anzahlWS = args.warteschlangen
      zeitquanten = args.quantum
 else:
-    # Interaktive Benutzereingabe, wenn Kommandozentrale leer
+    #Interaktive Benutzereingabe, wenn Kommandozentrale leer
     anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
     zeitquanten = []
     for i in range(anzahlWS):
         zeitquanten.append(int(input(f'Gebe das Zeitquantum für Warteschlange {i+1} an:')))
         
-# Print Ausgabe
+#Print Ausgabe
 print('Anzahl der Warteschlangen:', anzahlWS)
 print('Zeitquantum: ',zeitquanten)
 print(f'Verwendeter Dateipfad: {process_list_file}')
 
 
-# Methode zum Einlesen der Prozesse
+#Methode zum Einlesen der Prozesse
 def lese_prozess_list(dateiname):
     prozesse = []
     try:
        with open(dateiname, 'r') as file:
            for line in file:
                parts = line.strip().split(',')
+               
+               #"prozess" initialisieren, da sonst eine Fehlermeldung entsteht
+               prozess = {}
+               
                if len(parts)== 3:  
                        
-                   # Dictionary 
+                   #Dictionary 
                    prozess = {
                        'name': parts[0],
                        'cpu_time': int(parts[1]),
@@ -71,6 +75,15 @@ for prozess in prozess_liste :
     
     wartezeiten.append(0)
     
+# Start Multilevel-Feedback-Schedule
+# Initalisierung der Warteschlangen
+ 
+warteschlangen = [[] for _ in range(anzahlWS)]
+warteschlangen[0].append(prozess) # Prozesse in die erste Warteschlange einreihen
+print("Prozesse in der ersten Warteschlange:")
+for prozess in warteschlangen[0]:
+    print(prozess)
+
 # Ausgabe der Laufzeit und Wartezeit 
 for i, prozesse in enumerate(prozess_liste) :
     print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
@@ -93,5 +106,3 @@ pyp.ylabel("Prozesse")
 pyp.title("Gantt-Diagramm der Prozessverarbeitung")
 
 pyp.show()
-
-
