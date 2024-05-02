@@ -15,14 +15,13 @@ args = parser.parse_args()
 # Dateipfad aus den Argumenten auslesen
 process_list_file = args.processlistfile
 
-# per Kommandozeilenargumente, wenn Werte vorhanden
+# per Kommandozeilenargumente, wenn vorhanden
 if args.warteschlangen is not None and args.quantum is not None:
      anzahlWS = args.warteschlangen
      zeitquanten = args.quantum
-     
 else:
-# Interaktive Benutzereingabe, wenn Benutzer Argumente nicht angibt
-    anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: ')) 
+    # Interaktive Benutzereingabe, wenn Kommandozentrale leer
+    anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
     zeitquanten = []
     for i in range(anzahlWS):
         zeitquanten.append(int(input(f'Gebe das Zeitquantum für Warteschlange {i+1} an:')))
@@ -32,18 +31,14 @@ print('Anzahl der Warteschlangen:', anzahlWS)
 print('Zeitquantum: ',zeitquanten)
 print(f'Verwendeter Dateipfad: {process_list_file}')
 
-<<<<<<< HEAD
+
 # Methode zum Einlesen der Prozesse
-=======
-#Methode zum Einlesen der Prozesse
->>>>>>> a52d3cd6e37cf6572702641e706c8106c60bab26
 def lese_prozess_list(dateiname):
     prozesse = []
     try:
        with open(dateiname, 'r') as file:
            for line in file:
                parts = line.strip().split(',')
-               
                if len(parts)== 3:  
                        
                    # Dictionary 
@@ -53,11 +48,7 @@ def lese_prozess_list(dateiname):
                        'ankunftszeit': int(parts[2])
                 }
                prozesse.append(prozess)
-<<<<<<< HEAD
-    # Fehlerbehandlung
-=======
                
->>>>>>> 0bccecc7a512a40c50646640926f2578e94f228d
     except FileNotFoundError:
         print(f'Fehler: Die Datei {dateiname} wurde nicht gefunden.')
         return []
@@ -66,43 +57,33 @@ def lese_prozess_list(dateiname):
         return []
     return prozesse   
 
-<<<<<<< HEAD
-
 # Prozesse aus der Datei lesen
-=======
-#Prozesse aus der Datei lesen
->>>>>>> 0bccecc7a512a40c50646640926f2578e94f228d
 prozess_liste = lese_prozess_list(process_list_file)
 
-<<<<<<< HEAD
-# Gantt-Diagramm
-# (man kann noch Schriftgröse und Platzierung der Titel einstellen)
-=======
-#Erstellen von leeren Listen für Laufzeit und Wartezeit
-laufzeiten = []
-wartezeiten = []
+# Erstellen von leeren Listen für Laufzeit und Wartezeit
+Laufzeiten = []
+Wartezeiten = []
 
-#Laufzeiten in der Liste abspeichern 
+# Laufzeiten in der Liste abspeichern 
 for prozess in prozess_liste :
     lz = prozess['cpu_time']
     laufzeiten.append(lz)
     
     wartezeiten.append(0)
     
-#Ausgabe der Laufzeit und Wartezeit 
+# Ausgabe der Laufzeit und Wartezeit 
 for i, prozesse in enumerate(prozess_liste) :
-    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
+    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {Laufzeiten[i]}, Wartezeit = {Wartezeiten[i]}')
 
-#Gantt-Diagramm
-#(man kann noch schriftgröse und platzierung der Titel einstellen)
->>>>>>> 0bccecc7a512a40c50646640926f2578e94f228d
+# Gantt-Diagramm
+# (man kann noch schriftgröse und platzierung der Titel einstellen)
 fig, achse = pyp.subplots()
 
-# Wert für breite notwendig -> So machbar?
+#Wert für breite notwendig -> So machbar?
 for i, prozess in enumerate(prozess_liste) :
     achse.barh(prozess, width = prozess('cpu_time'), left = prozess('ankunftszeit'), color = "green")
 
-# Limiter für x und y Achse muss gesetzt werden
+#Limiter für x und y Achse muss gesetzt werden
 pyp.xlim()
 pyp.xlabel("Zeit in Sekunden")
 
