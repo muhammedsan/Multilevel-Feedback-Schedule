@@ -22,7 +22,7 @@ if args.warteschlangen is not None and args.quantum is not None:
      anzahlWS = args.warteschlangen
      zeitquanten = args.quantum
 else:
-    #Interaktive Benutzereingabe, wenn Kommandozentrale leer
+    # Interaktive Benutzereingabe, wenn Kommandozentrale leer
     anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
     zeitquanten = []
     for i in range(anzahlWS):
@@ -41,9 +41,6 @@ def lese_prozess_list(dateiname):
        with open(dateiname, 'r') as file:
            for line in file:
                parts = line.strip().split(',')
-               
-               #"prozess" initialisieren, da sonst eine Fehlermeldung entsteht
-               prozess = {}
                
                if len(parts)== 3:  
                        
@@ -77,6 +74,10 @@ for prozess in prozess_liste :
     
     wartezeiten.append(0)
     
+# Ausgabe der Laufzeit und Wartezeit 
+for i, prozesse in enumerate(prozess_liste) :
+    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
+    
 # Start Multilevel-Feedback-Schedule
 # Initalisierung der Warteschlangen
  
@@ -85,10 +86,6 @@ warteschlangen[0].append(prozess) # Prozesse in die erste Warteschlange einreihe
 print("Prozesse in der ersten Warteschlange:")
 for prozess in warteschlangen[0]:
     print(prozess)
-
-# Ausgabe der Laufzeit und Wartezeit 
-for i, prozesse in enumerate(prozess_liste) :
-    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
 
 # Gantt-Diagramm
 # (man kann noch schriftgröse und platzierung der Titel einstellen)
@@ -102,7 +99,7 @@ for i, prozess in enumerate(prozess_liste) :
 pyp.xlim()
 pyp.xlabel("Zeit in Sekunden")
 
-pyp.ylim()
+pyp.ylim(0, len(prozess_liste))
 pyp.ylabel("Prozesse")
 
 pyp.title("Gantt-Diagramm der Prozessverarbeitung")
