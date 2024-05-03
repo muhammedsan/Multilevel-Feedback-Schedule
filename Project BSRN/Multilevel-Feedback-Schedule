@@ -138,14 +138,16 @@ pyp.title("Gantt-Diagramm der Prozessverarbeitung")
 pyp.show()
 
 # Ausgabedatei/ Parser
-parser=argparse.ArgumentParser(description='Ausgabedatei: Name& Pfad')
-parser.add_argument('dateiname',type=str, required=False, help='Geben Sie den Namen für die Ausgabedatei an')
-parser.add_argument('dateipfad',type=str, help='Geben Sie den Pfad für die Ausgabedatei an')
+ausgabe_parser=argparse.ArgumentParser(description='Ausgabedatei: Name& Pfad')
+ausgabe_parser.add_argument('dateiname',type=str, required=False, help='Geben Sie den Namen für die Ausgabedatei an')
+ausgabe_parser.add_argument('dateipfad',type=str, help='Geben Sie den Pfad für die Ausgabedatei an')
+ausgabe_parser = ausgabe_parser.parse_args
 
 # Logdatei/ Parser
-parser.add_argument('logdatei', type=str,required=True,help='Geben Sie den Namen der Logdatei an' )
-parser.add_argument('logdateipfad',type=str, required=True, help='Geben Sie einen Pfad für die Logdatei an')
-args = parser.parse_args
+log_parser = argparse.ArgumentParser(description='Logdatei konfigurieren')
+log_parser.add_argument('logdatei', type=str,required=True,help='Geben Sie den Namen der Logdatei an' )
+log_parser.add_argument('logdateipfad',type=str, required=True, help='Geben Sie einen Pfad für die Logdatei an')
+log_args = log_parser.parse_args
 
 # Grundkonfiguration logdatei
 logging.basicConfig(filename=args.logdatei, level=logging.INFO, format='%(asctime)s - %(message)s')
