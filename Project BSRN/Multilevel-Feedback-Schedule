@@ -91,7 +91,12 @@ for prozess in prozess_liste:
 for i in range(len(warteschlangen)):
     while warteschlangen[i]:
         prozess = warteschlangen[i].pop(0)
-        prozess['cpu_time'] -= zeitquanten[i]   #CPU Zeit wird um Zeitquantum reduziert
+        prozess['cpu_time'] -= zeitquanten[i]   # CPU Zeit wird um Zeitquantum reduziert
+
+        if prozess['cpu time'] > 0: # Überprüfen, ob der Prozess noch CPU-Zeit hat
+            if i < len(warteschlangen) -1: # Wenn ja, füge Prozess in die nächste Warteschlange ein
+                warteschlangen[i+1].append(prozess) 
+
 
 
 
