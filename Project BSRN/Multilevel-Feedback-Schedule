@@ -20,7 +20,7 @@ process_list_file = args.processlistfile
 # per Kommandozeilenargumente, wenn vorhanden
 if args.warteschlangen is not None and args.quantum is not None:
      anzahlWS = args.warteschlangen
-     zeitquanten = args.quantum
+     quantum = args.quantum
      
 else:
     # Interaktive Benutzereingabe, wenn Kommandozentrale leer
@@ -100,7 +100,8 @@ for prozess in prozess_liste:
     warteschlangen[0].append(prozess)
     
 # Simulation
-for i in range(len(warteschlangen)):
+i = 0
+while i < len(warteschlangen):
     while warteschlangen[i]:
         prozess = warteschlangen[i].pop(0)
         prozess['cpu_time'] -= zeitquanten[i]   # CPU Zeit wird um Zeitquantum reduziert
@@ -108,11 +109,12 @@ for i in range(len(warteschlangen)):
         if prozess['cpu time'] > 0: # Überprüfen, ob der Prozess noch CPU-Zeit hat
             if i < len(warteschlangen) -1: # Wenn ja, füge Prozess in die nächste Warteschlange ein
                 warteschlangen[i+1].append(prozess) 
-
+                
             else:
                 warteschlangen[i].append(prozess)  # Prozess bleibt in der tiefsten Warteschlange
         else:
             print(f"Prozess {prozess['name']} abgeschlossen.") 
+    i += 1
 
 #Ausgabe der Daten
 for prozess in prozess_liste:
