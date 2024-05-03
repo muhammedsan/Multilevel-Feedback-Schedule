@@ -86,20 +86,23 @@ warteschlangen = [[] for _ in range(anzahlWS)]
 # Prozesse in WS1 hinzugefügt
 for prozess in prozess_liste:
     warteschlangen[0].append(prozess)
+    
+# Simulatiion
+for i in range(len(warteschlangen)):
+    while warteschlangen[i]:
+        prozess = warteschlangen[i].pop(0)
+        prozess['cpu_time'] -= zeitquanten[i]   #CPU Zeit wird um Zeitquantum reduziert
+
+
+
+
+
+
 
 # Ausgabe aller Prozesse
 print("Prozesse in der ersten Warteschlange:")
 for prozess in warteschlangen[0]:
     print(prozess)
-
-# Verwaltung der Warteschlangen
-
-
-
-
-
-
-
 
 
 # Ausgabe der Laufzeit und Wartezeit 
@@ -107,7 +110,7 @@ for i, prozesse in enumerate(prozess_liste) :
     print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
 
 # Gantt-Diagramm
-# (man kann noch schriftgröse und platzierung der Titel einstellen)
+# (man kann noch schriftgröse und Platzierung der Titel einstellen)
 fig, achse = pyp.subplots()
 
 # Wert für breite notwendig -> So machbar?
