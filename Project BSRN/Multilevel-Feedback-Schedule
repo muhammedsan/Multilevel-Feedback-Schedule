@@ -8,11 +8,11 @@ import logging
 import matplotlib.pyplot as pyp
 
 # Parser einrichten
-parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
-parser.add_argument('-processlistfile', type=str, required=True,help ='Geben Sie den Pfad zur Prozessliste an')
-parser.add_argument('-warteschlangen' , type=int, required=False, help = 'Anzahl der Warteschlangen')
-parser.add_argument('-quantum', type=int, nargs='+', required=False, help='Liste von Zeitquanten für jede Warteschlange')
-args = parser.parse_args()
+prozess_parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
+prozess_parser.add_argument('-processlistfile', type=str, required=True,help ='Geben Sie den Pfad zur Prozessliste an')
+prozess_parser.add_argument('-warteschlangen' , type=int, required=False, help = 'Anzahl der Warteschlangen')
+prozess_parser.add_argument('-quantum', type=int, nargs='+', required=False, help='Liste von Zeitquanten für jede Warteschlange')
+args = prozess_parser.parse_args()
 
 # Dateipfad aus den Argumenten auslesen
 process_list_file = args.processlistfile
@@ -24,8 +24,20 @@ if args.warteschlangen is not None and args.quantum is not None:
      
 else:
     # Interaktive Benutzereingabe, wenn Kommandozentrale leer
-    anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
+    while True: 
+     try:
+          anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
+          if anzahlWS <= 0: 
+             raise ValueError('Die Anzahl der Warteschlange muss größer als 0 sein')
+            
+          break # Verlässt die Schleife nur bei gültiger Eingabe
+     except ValueError as e: 
+         print(e)
+        
+
+
     
+
     zeitquanten = []
     for i in range(anzahlWS):
         while True:
@@ -116,7 +128,7 @@ while i < len(warteschlangen):
             print(f"Prozess {prozess['name']} abgeschlossen.") 
     i += 1
 
-#Ausgabe der Daten
+# Ausgabe der Daten
 for prozess in prozess_liste:
     print(f"Prozessdaten: Name = {prozess['name']}, Verbleibende CPU-Zeit = {prozess['cpu_time']}")
 
