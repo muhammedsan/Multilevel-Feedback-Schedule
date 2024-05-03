@@ -87,7 +87,7 @@ warteschlangen = [[] for _ in range(anzahlWS)]
 for prozess in prozess_liste:
     warteschlangen[0].append(prozess)
     
-# Simulatiion
+# Simulation
 for i in range(len(warteschlangen)):
     while warteschlangen[i]:
         prozess = warteschlangen[i].pop(0)
@@ -97,20 +97,24 @@ for i in range(len(warteschlangen)):
             if i < len(warteschlangen) -1: # Wenn ja, füge Prozess in die nächste Warteschlange ein
                 warteschlangen[i+1].append(prozess) 
 
+            else:
+                warteschlangen[i].append(prozess)  # Prozess bleibt in der tiefsten Warteschlange
+        else:
+            print(f"Prozess {prozess['name']} abgeschlossen.") 
+
+#Ausgabe der Daten
+for prozess in prozess_liste:
+    print(f"Prozessdaten: Name = {prozess['name']}, Verbleibende CPU-Zeit = {prozess['cpu_time']}")
 
 
 
 
 
+# Verwaltung der Warteschlangen
+prozess_liste = lese_prozess_list(args.processlistfile)
 
 
-# Ausgabe aller Prozesse
-print("Prozesse in der ersten Warteschlange:")
-for prozess in warteschlangen[0]:
-    print(prozess)
-
-
-# Ausgabe der Laufzeit und Wartezeit 
+ # Ausgabe der Laufzeit und Wartezeit 
 for i, prozesse in enumerate(prozess_liste) :
     print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
 
