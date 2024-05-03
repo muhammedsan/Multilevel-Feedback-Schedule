@@ -3,7 +3,7 @@ import argparse
 # Import des Logging Moduls für die Dokumentation
 import logging
 
-# Bibliothek für Gantt-Diagramm
+
 # Pyplot durch "as pyp" in pyp umbenannt
 import matplotlib.pyplot as pyp
 
@@ -21,12 +21,24 @@ process_list_file = args.processlistfile
 if args.warteschlangen is not None and args.quantum is not None:
      anzahlWS = args.warteschlangen
      zeitquanten = args.quantum
+     
 else:
     # Interaktive Benutzereingabe, wenn Kommandozentrale leer
     anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
+    
     zeitquanten = []
     for i in range(anzahlWS):
-        zeitquanten.append(int(input(f'Gebe das Zeitquantum für Warteschlange {i+1} an:')))
+        while True:
+            try:
+                quantum = int(input(f'Gebe das Zeitquantum für Warteschlange {i+1} an:'))
+                if quantum <= 0:
+                    raise ValueError('Das Zeitquantum muss größer als 0 sein')
+                zeitquanten.append(quantum)
+                break
+            except ValueError as e:
+                print(e)
+                
+    
         
 # Print Ausgabe
 print('Anzahl der Warteschlangen:', anzahlWS)
