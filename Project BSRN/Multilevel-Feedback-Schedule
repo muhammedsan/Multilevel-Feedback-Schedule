@@ -144,6 +144,11 @@ prozess_liste = lese_prozess_list(args.processlistfile)
 for i, prozesse in enumerate(prozess_liste) :
     print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
 
+
+durchschnittliche_laufzeit = sum(laufzeiten) / len(prozess_liste) #berechnung der durchschnittlichen Laufzeit 
+
+print(f"Durchschnittliche Laufzeit: {durchschnittliche_laufzeit}") #Ausgabe der durchschnittlichen Laufzeit
+
 # Gantt-Diagramm
 # (man kann noch schriftgröse und Platzierung der Titel einstellen)
 fig, achse = pyp.subplots()
