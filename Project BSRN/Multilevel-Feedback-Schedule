@@ -12,6 +12,7 @@ prozess_parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
 prozess_parser.add_argument('-processlistfile', type=str, required=True,help ='Geben Sie den Pfad zur Prozessliste an')
 prozess_parser.add_argument('-warteschlangen' , type=int, required=False, help = 'Anzahl der Warteschlangen')
 prozess_parser.add_argument('-quantum', type=int, nargs='+', required=False, help='Liste von Zeitquanten für jede Warteschlange')
+prozess_parser.add('-ausgabedatei', type=str, required=True,help='Pfad zur Ausgabedatei')
 args = prozess_parser.parse_args()
 
 # Dateipfad aus den Argumenten auslesen
@@ -34,8 +35,8 @@ else:
      except ValueError as e: 
          print(e)
         
-
-
+        
+        
     
 
     zeitquanten = []
@@ -87,25 +88,10 @@ def lese_prozess_list(dateiname):
 # Prozesse aus der Datei lesen
 prozess_liste = lese_prozess_list(process_list_file)
 
-# Erstellen von leeren Listen für Laufzeit und Wartezeit
-laufzeiten = []
-wartezeiten = []
-
-# Laufzeiten in der Liste abspeichern 
-for prozess in prozess_liste :
-    lz = prozess['cpu_time']
-    laufzeiten.append(lz)
-    
-    wartezeiten.append(0)
-    
-# Ausgabe der Laufzeit und Wartezeit 
-for i, prozesse in enumerate(prozess_liste) :
-    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
     
 # Start Multilevel-Feedback-Schedule
-# Initalisierung der Warteschlangen
- 
-warteschlangen = [[] for _ in range(anzahlWS)]
+laufzeit = []
+warteschlangen = [[] for _ in range(anzahlWS)]   #Initalisierung der Warteschlangen
 
 # Prozesse in WS1 hinzugefügt
 for prozess in prozess_liste:
@@ -136,18 +122,13 @@ for prozess in prozess_liste:
 
 
 
-# Verwaltung der Warteschlangen
+
 prozess_liste = lese_prozess_list(args.processlistfile)
 
 
  # Ausgabe der Laufzeit und Wartezeit 
 for i, prozesse in enumerate(prozess_liste) :
     print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
-
-
-durchschnittliche_laufzeit = sum(laufzeiten) / len(prozess_liste) # Berechnung der durchschnittlichen Laufzeit 
-
-print(f"Durchschnittliche Laufzeit: {durchschnittliche_laufzeit}") # Ausgabe der durchschnittlichen Laufzeit
 
 # Gantt-Diagramm
 # (man kann noch schriftgröse und Platzierung der Titel einstellen)
@@ -201,7 +182,7 @@ else: logdateipfad = input("Geben Sie den Pfad für die Logdatei an")
 # Öffnen der Ausgabedatei 
 with open(args.dateiname, 'w') as f: 
    # für später relevant(Laufzeit, Durchschnitt etc.)
-   f.write(f"Durchschnittliche Laufzeit: {durchschnittliche_laufzeit}\n") # Durchschnittliche Laufzeit wird in die Ausgabedatei geschrieben
+   f.write("")
 print(f"Name der Ausgabedatei: {args.dateiname}")
 print(f"Pfad der Ausgabedatei: {args.dateipfad}")
 
