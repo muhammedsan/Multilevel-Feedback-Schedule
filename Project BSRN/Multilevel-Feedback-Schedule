@@ -1,11 +1,7 @@
 import argparse
-
-# Import des Logging Moduls für die Dokumentation
 import logging
-
-
-# Pyplot durch "as pyp" in pyp umbenannt
 import matplotlib.pyplot as pyp
+
 
 # Parser einrichten
 prozess_parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
@@ -15,14 +11,15 @@ prozess_parser.add_argument('-quantum', type=int, nargs='+', required=False, hel
 prozess_parser.add('-ausgabedatei', type=str, required=True,help='Pfad zur Ausgabedatei')   # Weist vielleicht Fehler auf
 args = prozess_parser.parse_args()
 
+
 # Dateipfad aus den Argumenten auslesen
 process_list_file = args.processlistfile
+
 
 # per Kommandozeilenargumente, wenn vorhanden
 if args.warteschlangen is not None and args.quantum is not None:
      anzahlWS = args.warteschlangen
      quantum = args.quantum
-     
 else:
     # Interaktive Benutzereingabe, wenn Kommandozentrale leer
     while True: 
@@ -30,15 +27,11 @@ else:
           anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
           if anzahlWS <= 0: 
              raise ValueError('Die Anzahl der Warteschlange muss größer als 0 sein')
-            
           break # Verlässt die Schleife nur bei gültiger Eingabe
      except ValueError as e: 
          print(e)
         
         
-        
-    
-
     zeitquanten = []
     for i in range(anzahlWS):
         while True:
@@ -51,8 +44,7 @@ else:
             except ValueError as e:
                 print(e)
                 
-    
-        
+                
 # Print Ausgabe
 print('Anzahl der Warteschlangen:', anzahlWS)
 print('Zeitquantum: ',zeitquanten)
@@ -66,9 +58,7 @@ def lese_prozess_list(dateiname):
        with open(dateiname, 'r') as file:
            for line in file:
                parts = line.strip().split(',')
-               
                if len(parts)== 3:  
-                       
                    #Dictionary 
                    prozess = {
                        'name': parts[0],
@@ -76,7 +66,6 @@ def lese_prozess_list(dateiname):
                        'ankunftszeit': int(parts[2])
                 }
                prozesse.append(prozess)
-               
     except FileNotFoundError:
         print(f'Fehler: Die Datei {dateiname} wurde nicht gefunden.')
         return []
@@ -88,36 +77,47 @@ def lese_prozess_list(dateiname):
 # Prozesse aus der Datei lesen
 prozess_liste = lese_prozess_list(process_list_file)
 
-    
 # Start Multilevel-Feedback-Schedule
-laufzeit = []       # Initialisierung der Laufzeit
-wartezeit = []      # Initialisierung der wartezeit
-warteschlangen = [[] for _ in range(anzahlWS)]   #Initalisierung der Warteschlangen
+laufzeit = []       
+wartezeit = []      
+warteschlangen = [[] for _ in range(anzahlWS)]   
+startzeiten = {prozess['name']: None for prozess in prozess_liste} #Startzeit intialisiert
 
 # Prozesse in WS1 hinzugefügtt
 for prozess in prozess_liste:
     warteschlangen[0].append(prozess)
     
 # Simulation
-# Funktioniert nicht wie gewollt 
 i = 0
 n = 1
+zeit = 0
+prozess_laufzeiten = {prozess['name']: 0 for prozess in prozess_liste} #Dictionary 
+
 while i < len(warteschlangen):
     while warteschlangen[i]:
         prozess = warteschlangen[i].pop(0)
+        
+        if startzeiten [prozess['name']] is None:
+            startzeiten[prozess['name']] = zeit
+            
+            cpu_zeit_vorher = prozess['cpu_time']
+            prozess['cpu_time'] -= zeitquanten[i] # CPU Zeit wird um Zeitquantum reduziert
+            zeit += min(zeitquanten[i], cpu_zeit_vorher) #Aktuelle Zeit wird aktualisiert
+        
         print(f"Prozess {prozess['name']} wird bearbeitet")
-        prozess['cpu_time'] -= zeitquanten[i]   # CPU Zeit wird um Zeitquantum reduziert
-
-        if prozess['cpu time'] > 0: # Überprüfen, ob der Prozess noch CPU-Zeit hat
-            
-            
+        
+        # Überprüfen, ob der Prozess noch CPU-Zeit hat
+        if prozess['cpu_time'] > 0:
+            prozess_laufzeiten[prozess['name']] += zeitquanten # Laufzeit um das Zeitquantum erhöhen
             
             if i < len(warteschlangen) -1: # Wenn ja, füge Prozess in die nächste Warteschlange ein
                 warteschlangen[i+1].append(prozess) 
                 print(f"Prozess = {prozess['name']} ist jetzt in der {n + 1} Warteschlange!")
                 n += 1
-                
             else:
+                prozess_laufzeiten[prozess['name']] += cpu_zeit_vorher
+                laufzeit = zeit - startzeiten[prozess['name']] # Gesamte Laufzeit
+                laufzeit.append(prozess_laufzeiten)
                 warteschlangen[i].append(prozess)  # Prozess bleibt in der tiefsten Warteschlange
         else:
             print(f"Prozess {prozess['name']} abgeschlossen.") 
@@ -136,10 +136,14 @@ for prozess in prozess_liste:
 # Ausgabe der Laufzeit und Wartezeit 
 for i, prozesse in enumerate(prozess_liste) :
     print(f'Prozess {i + 1}: Name = {prozess['name']}, Laufzeit = {laufzeit[i]}, Wartezeit = {wartezeit[i]}')
+print ("Laufzeiten der einzelnen Prozesse: " , laufzeit)
 
 
+<<<<<<< HEAD
+=======
 
 # Verwaltung der Warteschlangen
+>>>>>>> 7c85ca0bb6ad14bc926fba80beda3c6951b6835e
 prozess_liste = lese_prozess_list(args.processlistfile)
 
 
@@ -155,10 +159,11 @@ fig, achse = pyp.subplots()
 for i, prozess in enumerate(prozess_liste) :
     achse.barh(y = i, width = prozess['cpu_time'], left = prozess['ankunftszeit'], color = "green")
 
-# Labels geändert und ticks gesetzt zur anordnung von cpu laufzeit und ankunftszeit
+# Labels geändert und Ticks gesetzt zur Anordnung von cpu Laufzeit und Ankunftszeit
 pyp.xlim()
 achse.set_xticklabels([prozess['cpu_time']] for prozess in prozess_liste)
 pyp.xlabel("CPU Laufzeit")
+
 
 achse.set_yticks(range(len(prozess_liste)))
 achse.set_yticklabels([prozess['ankunftszeit']] for prozess in prozess_liste)
