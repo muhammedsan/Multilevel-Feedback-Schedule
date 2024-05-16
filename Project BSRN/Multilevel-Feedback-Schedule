@@ -76,6 +76,7 @@ def lese_prozess_list(dateiname):
 
 # Prozesse aus der Datei lesen
 prozess_liste = lese_prozess_list(process_list_file)
+logdatei = open("logdatei.txt", "w") # Öffnen der Logdatei
 
 # Start Multilevel-Feedback-Schedule
 laufzeit = []       
@@ -83,7 +84,7 @@ wartezeit = []
 warteschlangen = [[] for _ in range(anzahlWS)]   
 startzeiten = {prozess['name']: None for prozess in prozess_liste} #Startzeit intialisiert
 
-# Prozesse in WS1 hinzugefügtt
+# Prozesse in WS1 hinzugefügt
 for prozess in prozess_liste:
     warteschlangen[0].append(prozess)
     
@@ -105,14 +106,15 @@ while i < len(warteschlangen):
             zeit += min(zeitquanten[i], cpu_zeit_vorher) #Aktuelle Zeit wird aktualisiert
         
         print(f"Prozess {prozess['name']} wird bearbeitet")
-        
-        # Überprüfen, ob der Prozess noch CPU-Zeit hat
-        if prozess['cpu_time'] > 0:
-            prozess_laufzeiten[prozess['name']] += zeitquanten # Laufzeit um das Zeitquantum erhöhen
+        logdatei.write(f"Prozess {prozess['name']} wird bearbeitet")
+        prozess['cpu_time'] -= zeitquanten[i]   # CPU Zeit wird um Zeitquantum reduziert
+
+        if prozess['cpu time'] > 0: # Überprüfen, ob der Prozess noch CPU-Zeit hat
             
             if i < len(warteschlangen) -1: # Wenn ja, füge Prozess in die nächste Warteschlange ein
                 warteschlangen[i+1].append(prozess) 
                 print(f"Prozess = {prozess['name']} ist jetzt in der {n + 1} Warteschlange!")
+                logdatei.write(f"Prozess {prozess ['name']} ist jetzt in der {n + 1} Warteschlange!")
                 n += 1
             else:
                 prozess_laufzeiten[prozess['name']] += cpu_zeit_vorher
@@ -121,6 +123,7 @@ while i < len(warteschlangen):
                 warteschlangen[i].append(prozess)  # Prozess bleibt in der tiefsten Warteschlange
         else:
             print(f"Prozess {prozess['name']} abgeschlossen.") 
+            logdatei.write(f"Prozess {['name']} abgeschlossen.")
             # CPU Laufzeit auf 0 setzen 
             prozess['cpu_time'] = 0 
             aktuelle_cpu_time = prozess['cpu_time']
@@ -135,42 +138,42 @@ for prozess in prozess_liste:
 
 # Ausgabe der Laufzeit und Wartezeit 
 for i, prozesse in enumerate(prozess_liste) :
-    print(f'Prozess {i + 1}: Name = {prozess['name']}, Laufzeit = {laufzeit[i]}, Wartezeit = {wartezeit[i]}')
-print ("Laufzeiten der einzelnen Prozesse: " , laufzeit)
+    print(f'Prozess {i + 1}: Name = {prozess['name' ]}, Laufzeit = {laufzeit[i]}, Wartezeit = {wartezeit[i]}')
 
 
-<<<<<<< HEAD
-=======
-
-# Verwaltung der Warteschlangen
->>>>>>> 7c85ca0bb6ad14bc926fba80beda3c6951b6835e
 prozess_liste = lese_prozess_list(args.processlistfile)
 
 
  # Ausgabe der Laufzeit und Wartezeit 
 for i, prozesse in enumerate(prozess_liste) :
-    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
+    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeit[i]}, Wartezeit = {wartezeit[i]}')
 
 # Gantt-Diagramm
 # (man kann noch schriftgröse und Platzierung der Titel einstellen)
 fig, achse = pyp.subplots()
 
+# Berechnen der maximalen Zeit, für die X Achse
+max_zeit = max(prozess['ankunftszeit'] + prozess['cpu_time'] for prozess in prozess_liste)
+
 # Wert für breite notwendig -> So machbar?
 for i, prozess in enumerate(prozess_liste) :
     achse.barh(y = i, width = prozess['cpu_time'], left = prozess['ankunftszeit'], color = "green")
 
-# Labels geändert und Ticks gesetzt zur Anordnung von cpu Laufzeit und Ankunftszeit
-pyp.xlim()
-achse.set_xticklabels([prozess['cpu_time']] for prozess in prozess_liste)
-pyp.xlabel("CPU Laufzeit")
+# Labels geändert und ticks gesetzt zur anordnung von cpu laufzeit und ankunftszeit
+achse.set_xticks(range(0,max_zeit+1))
+achse.set_xticklabels(0,max_zeit)
+pyp.xlim(0, max_zeit)
+pyp.xlabel("Zeit")
 
 
 achse.set_yticks(range(len(prozess_liste)))
-achse.set_yticklabels([prozess['ankunftszeit']] for prozess in prozess_liste)
-pyp.ylabel("Ankunftszeit")
+achse.set_yticklabels([prozess['name']  for prozess in prozess_liste])
+pyp.ylabel("Prozesse")
 
 pyp.title("Gantt-Diagramm der Prozessverarbeitung")
 
+# Gitter für bessere Lesbarkeit 
+achse.grid(True,linestyle = '-', linewidth=0.5)
 pyp.show()
 
 # Ausgabedatei/ Parser
