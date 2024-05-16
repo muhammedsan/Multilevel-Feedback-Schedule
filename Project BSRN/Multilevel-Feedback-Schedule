@@ -139,8 +139,13 @@ for i, prozesse in enumerate(prozess_liste) :
 
 
 
+# Verwaltung der Warteschlangen
 prozess_liste = lese_prozess_list(args.processlistfile)
 
+
+ # Ausgabe der Laufzeit und Wartezeit 
+for i, prozesse in enumerate(prozess_liste) :
+    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeiten[i]}, Wartezeit = {wartezeiten[i]}')
 
 # Gantt-Diagramm
 # (man kann noch schriftgröse und Platzierung der Titel einstellen)
@@ -199,3 +204,5 @@ with open(args.dateiname, 'w') as f:
    f.write("")
 print(f"Name der Ausgabedatei: {args.dateiname}")
 print(f"Pfad der Ausgabedatei: {args.dateipfad}")
+
+
