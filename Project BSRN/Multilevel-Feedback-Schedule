@@ -208,8 +208,10 @@ else: logdateipfad = input("Geben Sie den Pfad für die Logdatei an")
 
 # Öffnen der Ausgabedatei 
 with open(args.dateiname, 'w') as f: 
-   # für später relevant(Laufzeit, Durchschnitt etc.)
-   f.write("")
+   # Print in die Ausgabedatei
+   f.write('Anzahl der Warteschlangen: '+anzahlWS)
+   f.write('Zeitquanten: '+zeitquanten)
+
 print(f"Name der Ausgabedatei: {args.dateiname}")
 print(f"Pfad der Ausgabedatei: {args.dateipfad}")
 
