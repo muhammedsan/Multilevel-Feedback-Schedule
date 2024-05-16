@@ -101,34 +101,41 @@ for prozess in prozess_liste:
 # Simulation
 # Funktioniert nicht wie gewollt 
 i = 0
+n = 1
 while i < len(warteschlangen):
     while warteschlangen[i]:
         prozess = warteschlangen[i].pop(0)
+        print(f"Prozess {prozess['name']} wird bearbeitet")
         prozess['cpu_time'] -= zeitquanten[i]   # CPU Zeit wird um Zeitquantum reduziert
 
         if prozess['cpu time'] > 0: # Überprüfen, ob der Prozess noch CPU-Zeit hat
             
-            laufzeit.append(zeitquanten[i]) # Laufzeit um das zeitquantum erhöhen
+            
             
             if i < len(warteschlangen) -1: # Wenn ja, füge Prozess in die nächste Warteschlange ein
                 warteschlangen[i+1].append(prozess) 
+                print(f"Prozess = {prozess['name']} ist jetzt in der {n + 1} Warteschlange!")
+                n += 1
                 
             else:
                 warteschlangen[i].append(prozess)  # Prozess bleibt in der tiefsten Warteschlange
         else:
-            laufzeit.append(prozess['cpu time']) # Laufzeit um cpu zeit erhöhen
-            
             print(f"Prozess {prozess['name']} abgeschlossen.") 
+            # CPU Laufzeit auf 0 setzen 
+            prozess['cpu_time'] = 0 
+            aktuelle_cpu_time = prozess['cpu_time']
+            
     i += 1
 
 # Ausgabe der Daten
+# Name wird falsch ausgegeben
 for prozess in prozess_liste:
-    print(f"Prozessdaten: Name = {prozess['name']}, Verbleibende CPU-Zeit = {prozess['cpu_time']}")
+    print(f"Prozessdaten: Name = {prozess['name']}, Verbleibende CPU-Zeit = {aktuelle_cpu_time}")
 
 
 # Ausgabe der Laufzeit und Wartezeit 
 for i, prozesse in enumerate(prozess_liste) :
-    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeit[i]}, Wartezeit = {wartezeit[i]}')
+    print(f'Prozess {i + 1}: Name = {prozess['name']}, Laufzeit = {laufzeit[i]}, Wartezeit = {wartezeit[i]}')
 
 
 
