@@ -94,7 +94,7 @@ laufzeit = []       # Initialisierung der Laufzeit
 wartezeit = []      # Initialisierung der wartezeit
 warteschlangen = [[] for _ in range(anzahlWS)]   #Initalisierung der Warteschlangen
 
-# Prozesse in WS1 hinzugefügt
+# Prozesse in WS1 hinzugefügtt
 for prozess in prozess_liste:
     warteschlangen[0].append(prozess)
     
