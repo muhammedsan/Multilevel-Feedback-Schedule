@@ -113,10 +113,10 @@ while i < len(warteschlangen):
         if startzeiten [prozess['name']] is None:
             startzeiten[prozess['name']] = zeit
             
-        cpu_zeit_vorher = prozess['cpu_time']
-        prozess['cpu_time'] -= zeitquanten[i] 
-        
-        zeit += min(zeitquanten[i], cpu_zeit_vorher) #Aktuelle Zeit wird aktualisiert
+            cpu_zeit_vorher = prozess['cpu_time']
+            prozess['cpu_time'] -= zeitquanten[i] # CPU Zeit wird um Zeitquantum reduziert
+            ausführungs_zeit = min(zeitquanten[i], cpu_zeit_vorher) 
+            zeit += ausführungs_zeit # Aktuelle Zeit wird aktualisiert
         
         print(f"Prozess {prozess['name']} wird bearbeitet")
         logdatei.write(f"Prozess {prozess['name']} wird bearbeitet")
@@ -134,7 +134,7 @@ while i < len(warteschlangen):
                 warteschlangen[i].append(prozess)  # Prozess bleibt in der tiefsten Warteschlange
                 
         else:
-            laufzeit = zeit - startzeiten[prozess['name']] # Gesamte Laufzeit
+            laufzeit[prozess['name']] = zeit - startzeiten[prozess['name']] # Gesamte Laufzeit
             
             print(f"Prozess {prozess['name']} abgeschlossen.") 
             logdatei.write(f"Prozess {['name']} abgeschlossen.")
@@ -145,12 +145,19 @@ while i < len(warteschlangen):
             
             print(f"Prozessdaten: Name = {prozess['name']}, Verbleibende CPU-Zeit = {aktuelle_cpu_time}")
             
+            for j in range(len(warteschlangen)):
+                for prozess_in_warteschlange in warteschlangen[j]:
+                    if prozess_in_warteschlange['name'] != prozess['name']:
+                        wartezeit[prozess_in_warteschlange['name']] += ausführungs_zeit
+                        
+            for prozess in prozess_liste:
+                gesamte_zeit = laufzeit[prozess['name']] + wartezeit[prozess['name']]
+            
     i += 1
 
 # Ausgabe der Daten
-# Name wird falsch ausgegeben
 for prozess in prozess_liste:
-    print(f'Prozess: {prozess['name']}, Laufzeit = {laufzeit[i]}, Wartezeit = {wartezeit[i]}')
+    print(f"Prozess: {prozess['name']}, Laufzeit = {laufzeit[prozess['name']]}, Wartezeit = {wartezeit[prozess['name']]}")
 
 
 prozess_liste = lese_prozess_list(args.processlistfile)
