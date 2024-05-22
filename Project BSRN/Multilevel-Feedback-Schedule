@@ -3,14 +3,24 @@ import logging
 import matplotlib.pyplot as plt
 
 
-# Parser einrichten
+# Prozess /Parser
 prozess_parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
 prozess_parser.add_argument('-processlistfile', type=str, required=True,help ='Geben Sie den Pfad zur Prozessliste an')
 prozess_parser.add_argument('-warteschlangen' , type=int, required=False, help = 'Anzahl der Warteschlangen')
 prozess_parser.add_argument('-quantum', type=int, nargs='+', required=False, help='Liste von Zeitquanten für jede Warteschlange')
-prozess_parser.add_argument('-ausgabedatei', type=str, required=True,help='Pfad zur Ausgabedatei')   
-prozess_parser.add_argument('logdatei', type=str, required=True, help='Pfad zur Logdatei')
 args = prozess_parser.parse_args()
+
+# Ausgabedatei/ Parser
+ausgabe_parser=argparse.ArgumentParser(description='Ausgabedatei: Name& Pfad')
+ausgabe_parser.add_argument('dateiname',type=str, required=False, help='Geben Sie den Namen für die Ausgabedatei an')
+ausgabe_parser.add_argument('dateipfad',type=str, help='Geben Sie den Pfad für die Ausgabedatei an')
+ausgabe_parser = ausgabe_parser.parse_args
+
+# Logdatei/ Parser
+log_parser = argparse.ArgumentParser(description='Logdatei konfigurieren')
+log_parser.add_argument('logdatei', type=str,required=True,help='Geben Sie den Namen der Logdatei an' )
+log_parser.add_argument('logdateipfad',type=str, required=True, help='Geben Sie einen Pfad für die Logdatei an')
+log_args = log_parser.parse_args
 
 
 # Dateipfad aus den Argumenten auslesen
@@ -77,7 +87,9 @@ def lese_prozess_list(dateiname):
 
 # Prozesse aus der Datei lesen
 prozess_liste = lese_prozess_list(process_list_file)
-logdatei = open("logdatei.txt", "w") # Öffnen der Logdatei
+                        
+# Öffnen der Logdatei                                  
+logdatei = open("logdatei.txt", "w") 
 
 # Start Multilevel-Feedback-Schedule
 laufzeit = {prozess['name']: 0 for prozess in prozess_liste}       
@@ -175,17 +187,6 @@ plt.title("Gantt-Diagramm der Prozessverarbeitung")
 achse.grid(True,linestyle = '-', linewidth=0.5)
 plt.show()
 
-# Ausgabedatei/ Parser
-ausgabe_parser=argparse.ArgumentParser(description='Ausgabedatei: Name& Pfad')
-ausgabe_parser.add_argument('dateiname',type=str, required=False, help='Geben Sie den Namen für die Ausgabedatei an')
-ausgabe_parser.add_argument('dateipfad',type=str, help='Geben Sie den Pfad für die Ausgabedatei an')
-ausgabe_parser = ausgabe_parser.parse_args
-
-# Logdatei/ Parser
-log_parser = argparse.ArgumentParser(description='Logdatei konfigurieren')
-log_parser.add_argument('logdatei', type=str,required=True,help='Geben Sie den Namen der Logdatei an' )
-log_parser.add_argument('logdateipfad',type=str, required=True, help='Geben Sie einen Pfad für die Logdatei an')
-log_args = log_parser.parse_args
 
 # Grundkonfiguration logdatei
 logging.basicConfig(filename=args.logdatei, level=logging.INFO, format='%(asctime)s - %(message)s')
