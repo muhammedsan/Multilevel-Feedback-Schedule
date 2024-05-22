@@ -91,7 +91,7 @@ for prozess in prozess_liste:
 # Simulation
 i = 0
 zeit = 0
-prozess_laufzeiten = {prozess['name']: 0 for prozess in prozess_liste} #Dictionary 
+
 
 while i < len(warteschlangen):
     while warteschlangen[i]:
@@ -106,23 +106,22 @@ while i < len(warteschlangen):
         
         print(f"Prozess {prozess['name']} wird bearbeitet")
         logdatei.write(f"Prozess {prozess['name']} wird bearbeitet")
-        prozess['cpu_time'] -= zeitquanten[i]   # CPU Zeit wird um Zeitquantum reduziert
 
         if prozess['cpu time'] > 0: # Überprüfen, ob der Prozess noch CPU-Zeit hat
             
             if i < len(warteschlangen) -1: # Wenn ja, füge Prozess in die nächste Warteschlange ein
                 warteschlangen[i+1].append(prozess) 
+                
                 print(f"Prozess = {prozess['name']} ist jetzt in der {i + 2} Warteschlange!")
                 logdatei.write(f"Prozess {prozess ['name']} ist jetzt in der {i + 2} Warteschlange!")
                 
             else:
-                prozess_laufzeiten[prozess['name']] += cpu_zeit_vorher
                 laufzeit = zeit - startzeiten[prozess['name']] # Gesamte Laufzeit
-                laufzeit.append(prozess_laufzeiten)
                 warteschlangen[i].append(prozess)  # Prozess bleibt in der tiefsten Warteschlange
         else:
             print(f"Prozess {prozess['name']} abgeschlossen.") 
             logdatei.write(f"Prozess {['name']} abgeschlossen.")
+            
             # CPU Laufzeit auf 0 setzen 
             prozess['cpu_time'] = 0 
             aktuelle_cpu_time = prozess['cpu_time']
