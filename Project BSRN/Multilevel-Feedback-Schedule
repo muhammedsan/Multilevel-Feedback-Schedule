@@ -96,9 +96,10 @@ logging.basicConfig(filename=log_args.logdatei, level=logging.INFO, format='%(as
 
 # Start Multilevel-Feedback-Schedule
 laufzeit = {prozess['name']: 0 for prozess in prozess_liste}       
-wartezeit = {prozess['name']: 0 for prozess in prozess_liste}      
+gesamt_wartezeit = {prozess['name']: 0 for prozess in prozess_liste}      
 warteschlangen = [[] for _ in range(anzahlWS)]   
-startzeiten = {prozess['name']: None for prozess in prozess_liste} # Startzeit intialisiert
+startzeiten = {prozess['name']: None for prozess in prozess_liste} 
+zeit = 0
 
 # Prozesse in WS1 hinzugefügt
 for prozess in prozess_liste:
@@ -106,9 +107,6 @@ for prozess in prozess_liste:
     
 # Simulation
 i = 0
-zeit = 0
-
-
 while i < len(warteschlangen):
     while warteschlangen[i]:
         prozess = warteschlangen[i].pop(0)
@@ -120,17 +118,17 @@ while i < len(warteschlangen):
             prozess['cpu_time'] -= zeitquanten[i] # CPU Zeit wird um Zeitquantum reduziert
             ausführungs_zeit = min(zeitquanten[i], cpu_zeit_vorher) 
             zeit += ausführungs_zeit # Aktuelle Zeit wird aktualisiert
-        
-        print(f"Prozess {prozess['name']} wird bearbeitet")
-        logdatei.write(f"Prozess {prozess['name']} wird bearbeitet")
-
-        if prozess['cpu time'] > 0: # Überprüfen, ob der Prozess noch CPU-Zeit hat
             
+            logging.info(f'Prozess {prozess['name']} wird bearbeitet')
+            print(f"Prozess {prozess['name']} wird bearbeitet")
+            
+
+        if prozess['cpu_time'] > 0: # Überprüfen, ob der Prozess noch CPU-Zeit hat
             if i < len(warteschlangen) -1: # Wenn ja, füge Prozess in die nächste Warteschlange ein
                 warteschlangen[i+1].append(prozess) 
                 
                 print(f"Prozess = {prozess['name']} ist jetzt in der {i + 2} Warteschlange!")
-                logdatei.write(f"Prozess {prozess ['name']} ist jetzt in der {i + 2} Warteschlange!")
+                logdatei.info(f"Prozess {prozess ['name']} ist jetzt in der {i + 2} Warteschlange!")
                 print(f"Prozessdaten: Name = {prozess['name']}, Verbleibende CPU-Zeit = {prozess['name']}")
                 
             else:
@@ -139,33 +137,31 @@ while i < len(warteschlangen):
         else:
             laufzeit[prozess['name']] = zeit - startzeiten[prozess['name']] # Gesamte Laufzeit
             
-            print(f"Prozess {prozess['name']} abgeschlossen.") 
-            logdatei.write(f"Prozess {['name']} abgeschlossen.")
-            
             # CPU Laufzeit auf 0 setzen 
             prozess['cpu_time'] = 0 
             aktuelle_cpu_time = prozess['cpu_time']
+            
+            print(f"Prozess {prozess['name']} abgeschlossen.") 
+            logdatei.info(f"Prozess {['name']} abgeschlossen.")
             
             print(f"Prozessdaten: Name = {prozess['name']}, Verbleibende CPU-Zeit = {aktuelle_cpu_time}")
             
             for j in range(len(warteschlangen)):
                 for prozess_in_warteschlange in warteschlangen[j]:
                     if prozess_in_warteschlange['name'] != prozess['name']:
-                        wartezeit[prozess_in_warteschlange['name']] += ausführungs_zeit
+                        gesamt_wartezeit[prozess_in_warteschlange['name']] += ausführungs_zeit
                         
             for prozess in prozess_liste:
-                gesamte_zeit = laufzeit[prozess['name']] + wartezeit[prozess['name']]
+                gesamte_zeit = laufzeit[prozess['name']] + gesamt_wartezeit[prozess['name']]
             
     i += 1
 
 # Ausgabe der Daten
 for prozess in prozess_liste:
-    print(f"Prozess: {prozess['name']}, Laufzeit = {laufzeit[prozess['name']]}, Wartezeit = {wartezeit[prozess['name']]}")
+    print(f"Prozess: {prozess['name']}, Laufzeit = {laufzeit[prozess['name']]}, Wartezeit = {gesamt_wartezeit[prozess['name']]}")
 
 
 prozess_liste = lese_prozess_list(prozess_args.processlistfile)
-
-
 
 
 # Gantt-Diagramm
