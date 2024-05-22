@@ -8,7 +8,8 @@ prozess_parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
 prozess_parser.add_argument('-processlistfile', type=str, required=True,help ='Geben Sie den Pfad zur Prozessliste an')
 prozess_parser.add_argument('-warteschlangen' , type=int, required=False, help = 'Anzahl der Warteschlangen')
 prozess_parser.add_argument('-quantum', type=int, nargs='+', required=False, help='Liste von Zeitquanten für jede Warteschlange')
-prozess_parser.add('-ausgabedatei', type=str, required=True,help='Pfad zur Ausgabedatei')   # Weist vielleicht Fehler auf
+prozess_parser.add_argument('-ausgabedatei', type=str, required=True,help='Pfad zur Ausgabedatei')   
+prozess_parser.add_argument('logdatei', type=str, required=True, help='Pfad zur Logdatei')
 args = prozess_parser.parse_args()
 
 
@@ -82,7 +83,7 @@ logdatei = open("logdatei.txt", "w") # Öffnen der Logdatei
 laufzeit = {prozess['name']: 0 for prozess in prozess_liste}       
 wartezeit = {prozess['name']: 0 for prozess in prozess_liste}      
 warteschlangen = [[] for _ in range(anzahlWS)]   
-startzeiten = {prozess['name']: None for prozess in prozess_liste} #Startzeit intialisiert
+startzeiten = {prozess['name']: None for prozess in prozess_liste} # Startzeit intialisiert
 
 # Prozesse in WS1 hinzugefügt
 for prozess in prozess_liste:
