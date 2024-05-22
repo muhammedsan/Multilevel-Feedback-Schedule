@@ -69,7 +69,7 @@ def lese_prozess_list(dateiname):
        with open(dateiname, 'r') as file:
            for line in file:
                parts = line.strip().split(',')
-               if len(parts)== 3:  
+               if len(parts) == 3:  
                    #Dictionary 
                    prozess = {
                        'name': parts[0],
@@ -127,11 +127,14 @@ while i < len(warteschlangen):
                 
                 print(f"Prozess = {prozess['name']} ist jetzt in der {i + 2} Warteschlange!")
                 logdatei.write(f"Prozess {prozess ['name']} ist jetzt in der {i + 2} Warteschlange!")
+                print(f"Prozessdaten: Name = {prozess['name']}, Verbleibende CPU-Zeit = {prozess['name']}")
                 
             else:
-                laufzeit = zeit - startzeiten[prozess['name']] # Gesamte Laufzeit
                 warteschlangen[i].append(prozess)  # Prozess bleibt in der tiefsten Warteschlange
+                
         else:
+            laufzeit = zeit - startzeiten[prozess['name']] # Gesamte Laufzeit
+            
             print(f"Prozess {prozess['name']} abgeschlossen.") 
             logdatei.write(f"Prozess {['name']} abgeschlossen.")
             
@@ -139,17 +142,14 @@ while i < len(warteschlangen):
             prozess['cpu_time'] = 0 
             aktuelle_cpu_time = prozess['cpu_time']
             
+            print(f"Prozessdaten: Name = {prozess['name']}, Verbleibende CPU-Zeit = {aktuelle_cpu_time}")
+            
     i += 1
 
 # Ausgabe der Daten
 # Name wird falsch ausgegeben
 for prozess in prozess_liste:
-    print(f"Prozessdaten: Name = {prozess['name']}, Verbleibende CPU-Zeit = {aktuelle_cpu_time}")
-
-
-# Ausgabe der Laufzeit und Wartezeit 
-for i, prozesse in enumerate(prozess_liste) :
-    print(f'Prozess {i + 1}: Name = {prozess['name' ]}, Laufzeit = {laufzeit[i]}, Wartezeit = {wartezeit[i]}')
+    print(f'Prozess: {prozess['name']}, Laufzeit = {laufzeit[i]}, Wartezeit = {wartezeit[i]}')
 
 
 prozess_liste = lese_prozess_list(args.processlistfile)
