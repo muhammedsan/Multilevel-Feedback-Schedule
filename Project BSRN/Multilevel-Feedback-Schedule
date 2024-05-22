@@ -1,6 +1,6 @@
 import argparse
 import logging
-import matplotlib.pyplot as pyp
+import matplotlib.pyplot as plt
 
 
 # Parser einrichten
@@ -79,8 +79,8 @@ prozess_liste = lese_prozess_list(process_list_file)
 logdatei = open("logdatei.txt", "w") # Öffnen der Logdatei
 
 # Start Multilevel-Feedback-Schedule
-laufzeit = []       
-wartezeit = []      
+laufzeit = {prozess['name']: 0 for prozess in prozess_liste}       
+wartezeit = {prozess['name']: 0 for prozess in prozess_liste}      
 warteschlangen = [[] for _ in range(anzahlWS)]   
 startzeiten = {prozess['name']: None for prozess in prozess_liste} #Startzeit intialisiert
 
@@ -90,7 +90,6 @@ for prozess in prozess_liste:
     
 # Simulation
 i = 0
-n = 1
 zeit = 0
 prozess_laufzeiten = {prozess['name']: 0 for prozess in prozess_liste} #Dictionary 
 
@@ -113,9 +112,9 @@ while i < len(warteschlangen):
             
             if i < len(warteschlangen) -1: # Wenn ja, füge Prozess in die nächste Warteschlange ein
                 warteschlangen[i+1].append(prozess) 
-                print(f"Prozess = {prozess['name']} ist jetzt in der {n + 1} Warteschlange!")
-                logdatei.write(f"Prozess {prozess ['name']} ist jetzt in der {n + 1} Warteschlange!")
-                n += 1
+                print(f"Prozess = {prozess['name']} ist jetzt in der {i + 2} Warteschlange!")
+                logdatei.write(f"Prozess {prozess ['name']} ist jetzt in der {i + 2} Warteschlange!")
+                
             else:
                 prozess_laufzeiten[prozess['name']] += cpu_zeit_vorher
                 laufzeit = zeit - startzeiten[prozess['name']] # Gesamte Laufzeit
@@ -150,7 +149,7 @@ for i, prozesse in enumerate(prozess_liste) :
 
 # Gantt-Diagramm
 # (man kann noch schriftgröse und Platzierung der Titel einstellen)
-fig, achse = pyp.subplots()
+fig, achse = plt.subplots()
 
 # Berechnen der maximalen Zeit, für die X Achse
 max_zeit = max(prozess['ankunftszeit'] + prozess['cpu_time'] for prozess in prozess_liste)
@@ -162,19 +161,19 @@ for i, prozess in enumerate(prozess_liste) :
 # Labels geändert und ticks gesetzt zur anordnung von cpu laufzeit und ankunftszeit
 achse.set_xticks(range(0,max_zeit+1))
 achse.set_xticklabels(0,max_zeit)
-pyp.xlim(0, max_zeit)
-pyp.xlabel("Zeit")
+plt.xlim(0, max_zeit)
+plt.xlabel("Zeit")
 
 
 achse.set_yticks(range(len(prozess_liste)))
 achse.set_yticklabels([prozess['name']  for prozess in prozess_liste])
-pyp.ylabel("Prozesse")
+plt.ylabel("Prozesse")
 
-pyp.title("Gantt-Diagramm der Prozessverarbeitung")
+plt.title("Gantt-Diagramm der Prozessverarbeitung")
 
 # Gitter für bessere Lesbarkeit 
 achse.grid(True,linestyle = '-', linewidth=0.5)
-pyp.show()
+plt.show()
 
 # Ausgabedatei/ Parser
 ausgabe_parser=argparse.ArgumentParser(description='Ausgabedatei: Name& Pfad')
