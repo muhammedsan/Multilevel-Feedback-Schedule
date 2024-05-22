@@ -8,29 +8,29 @@ prozess_parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
 prozess_parser.add_argument('-processlistfile', type=str, required=True,help ='Geben Sie den Pfad zur Prozessliste an')
 prozess_parser.add_argument('-warteschlangen' , type=int, required=False, help = 'Anzahl der Warteschlangen')
 prozess_parser.add_argument('-quantum', type=int, nargs='+', required=False, help='Liste von Zeitquanten für jede Warteschlange')
-args = prozess_parser.parse_args()
+prozess_args = prozess_parser.parse_args()
 
 # Ausgabedatei/ Parser
 ausgabe_parser=argparse.ArgumentParser(description='Ausgabedatei: Name& Pfad')
 ausgabe_parser.add_argument('dateiname',type=str, required=False, help='Geben Sie den Namen für die Ausgabedatei an')
 ausgabe_parser.add_argument('dateipfad',type=str, help='Geben Sie den Pfad für die Ausgabedatei an')
-ausgabe_parser = ausgabe_parser.parse_args
+ausgabe_args = ausgabe_parser.parse_args()
 
 # Logdatei/ Parser
 log_parser = argparse.ArgumentParser(description='Logdatei konfigurieren')
 log_parser.add_argument('logdatei', type=str,required=True,help='Geben Sie den Namen der Logdatei an' )
 log_parser.add_argument('logdateipfad',type=str, required=True, help='Geben Sie einen Pfad für die Logdatei an')
-log_args = log_parser.parse_args
+log_args = log_parser.parse_args()
 
 
 # Dateipfad aus den Argumenten auslesen
-process_list_file = args.processlistfile
+process_list_file = prozess_args.processlistfile
 
 
 # per Kommandozeilenargumente, wenn vorhanden
-if args.warteschlangen is not None and args.quantum is not None:
-     anzahlWS = args.warteschlangen
-     quantum = args.quantum
+if prozess_args.warteschlangen is not None and prozess_args.quantum is not None:
+     anzahlWS = prozess_args.warteschlangen
+     quantum = prozess_args.quantum
 else:
     # Interaktive Benutzereingabe, wenn Kommandozentrale leer
     while True: 
@@ -70,7 +70,7 @@ def lese_prozess_list(dateiname):
            for line in file:
                parts = line.strip().split(',')
                if len(parts) == 3:  
-                   #Dictionary 
+                   # Dictionary 
                    prozess = {
                        'name': parts[0],
                        'cpu_time': int(parts[1]),
@@ -90,6 +90,9 @@ prozess_liste = lese_prozess_list(process_list_file)
                         
 # Öffnen der Logdatei                                  
 logdatei = open("logdatei.txt", "w") 
+
+# Grundkonfiguration Logdatei
+logging.basicConfig(filename=log_args.logdatei, level=logging.INFO, format='%(asctime)s - %(message)s')
 
 # Start Multilevel-Feedback-Schedule
 laufzeit = {prozess['name']: 0 for prozess in prozess_liste}       
@@ -160,48 +163,49 @@ for prozess in prozess_liste:
     print(f"Prozess: {prozess['name']}, Laufzeit = {laufzeit[prozess['name']]}, Wartezeit = {wartezeit[prozess['name']]}")
 
 
-prozess_liste = lese_prozess_list(args.processlistfile)
+prozess_liste = lese_prozess_list(prozess_args.processlistfile)
 
 
- # Ausgabe der Laufzeit und Wartezeit 
-for i, prozesse in enumerate(prozess_liste) :
-    print(f'Prozess {i + 1}: Name = {prozess["name"]}, Laufzeit = {laufzeit[i]}, Wartezeit = {wartezeit[i]}')
+
 
 # Gantt-Diagramm
-# (man kann noch schriftgröse und Platzierung der Titel einstellen)
 fig, achse = plt.subplots()
 
 # Berechnen der maximalen Zeit, für die X Achse
 max_zeit = max(prozess['ankunftszeit'] + prozess['cpu_time'] for prozess in prozess_liste)
 
-# Wert für breite notwendig -> So machbar?
+
 for i, prozess in enumerate(prozess_liste) :
     achse.barh(y = i, width = prozess['cpu_time'], left = prozess['ankunftszeit'], color = "green")
 
 # Labels geändert und ticks gesetzt zur anordnung von cpu laufzeit und ankunftszeit
+# Diagrammtitel
+plt.title("Gantt-Diagramm der Prozessverarbeitung") 
+
+# X - Achsenbeschriftungen und Ticks setzen
+achse.set_xlabel("Zeit")
 achse.set_xticks(range(0,max_zeit+1))
 achse.set_xticklabels(0,max_zeit)
-plt.xlim(0, max_zeit)
-plt.xlabel("Zeit")
 
-
+# Y - Achsenbeschriftungen und Ticks setzen
+achse.set_ylabel("Prozesse")
 achse.set_yticks(range(len(prozess_liste)))
 achse.set_yticklabels([prozess['name']  for prozess in prozess_liste])
-plt.ylabel("Prozesse")
 
-plt.title("Gantt-Diagramm der Prozessverarbeitung")
-
-# Gitter für bessere Lesbarkeit 
+# Gitterlinien hinzufügen
 achse.grid(True,linestyle = '-', linewidth=0.5)
+
+# Diagramm anzeigen
+plt.tight_layout()
 plt.show()
 
 
-# Grundkonfiguration logdatei
-logging.basicConfig(filename=args.logdatei, level=logging.INFO, format='%(asctime)s - %(message)s')
 
+
+# Fehlerbehebung Logdatei
 # Überprüfen, ob Logdateiargument vorhanden ist 
-if args.logdatei: 
-    logdatei = args.logdatei 
+if log_args.logdatei: 
+    logdatei = log_args.logdatei 
     # Überprüfen, ob ".log" im Dateinamen ist 
     if not logdatei.endswith(".log"):
         logdatei += ".log"
@@ -210,18 +214,18 @@ if not logdatei.endswith(".log"):
     logdatei += ".log"
 
 # Überprüfen, ob Logdateipfad vorhanden ist 
-if args.logdateipfad: 
-    logdateipfad = args.logdateipfad
+if log_args.logdateipfad: 
+    logdateipfad = log_args.logdateipfad
 else: logdateipfad = input("Geben Sie den Pfad für die Logdatei an")
 
 # Öffnen der Ausgabedatei 
-with open(args.dateiname, 'w') as f: 
-   # Print in die Ausgabedatei
+with open(ausgabe_args.dateiname, 'w') as f: 
+   # Print der wichtigsten Informationen in die Ausgabedatei
    f.write('Anzahl der Warteschlangen: '+anzahlWS)
    f.write('Zeitquanten: '+zeitquanten)
 
-print(f"Name der Ausgabedatei: {args.dateiname}")
-print(f"Pfad der Ausgabedatei: {args.dateipfad}")
+print(f"Name der Ausgabedatei: {ausgabe_args.dateiname}")
+print(f"Pfad der Ausgabedatei: {ausgabe_args.dateipfad}")
 
 
 
