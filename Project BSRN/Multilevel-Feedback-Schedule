@@ -3,7 +3,7 @@ import logging
 import matplotlib.pyplot as plt
 
 
-# Prozess /Parser
+# Prozess / Parser
 prozess_parser = argparse.ArgumentParser(description= 'Prozesse einlesen')
 prozess_parser.add_argument('-processlistfile', type=str, required=True,help ='Geben Sie den Pfad zur Prozessliste an')
 prozess_parser.add_argument('-warteschlangen' , type=int, required=False, help = 'Anzahl der Warteschlangen')
@@ -113,9 +113,10 @@ while i < len(warteschlangen):
         if startzeiten [prozess['name']] is None:
             startzeiten[prozess['name']] = zeit
             
-            cpu_zeit_vorher = prozess['cpu_time']
-            prozess['cpu_time'] -= zeitquanten[i] # CPU Zeit wird um Zeitquantum reduziert
-            zeit += min(zeitquanten[i], cpu_zeit_vorher) #Aktuelle Zeit wird aktualisiert
+        cpu_zeit_vorher = prozess['cpu_time']
+        prozess['cpu_time'] -= zeitquanten[i] 
+        
+        zeit += min(zeitquanten[i], cpu_zeit_vorher) #Aktuelle Zeit wird aktualisiert
         
         print(f"Prozess {prozess['name']} wird bearbeitet")
         logdatei.write(f"Prozess {prozess['name']} wird bearbeitet")
@@ -214,5 +215,6 @@ with open(args.dateiname, 'w') as f:
 
 print(f"Name der Ausgabedatei: {args.dateiname}")
 print(f"Pfad der Ausgabedatei: {args.dateipfad}")
+
 
 
