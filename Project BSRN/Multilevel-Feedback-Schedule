@@ -85,7 +85,7 @@ def lese_prozess_list(dateiname):
         return []
     return prozesse   
 
-# Prozesse aus der Datei lesen
+# P aus der Datei lesen
 prozess_liste = lese_prozess_list(process_list_file)
                         
 # Öffnen der Logdatei                                  
@@ -95,71 +95,57 @@ logdatei = open("logdatei.txt", "w")
 logging.basicConfig(filename=log_args.logdatei, level=logging.INFO, format='%(asctime)s - %(message)s')
 
 # Start Multilevel-Feedback-Schedule
-laufzeit = {prozess['name']: 0 for prozess in prozess_liste}       
+scheduling_warteschlangen = list(zip(zeitquanten, [[] for _ in range(anzahlWS)]))
+laufzeit = {prozess['name']: 0 for prozess in prozess_liste}  #Anfangslaufzeit = 0
 gesamt_wartezeit = {prozess['name']: 0 for prozess in prozess_liste}      
-warteschlangen = [[] for _ in range(anzahlWS)]   
-startzeiten = {prozess['name']: None for prozess in prozess_liste} 
-zeit = 0
+zeit = 0 
 
-# Prozesse in WS1 hinzugefügt
+# P in WS1 hinzugefügt
 for prozess in prozess_liste:
-    warteschlangen[0].append(prozess)
+    scheduling_warteschlangen[0][1].append(prozess) # P wird in die erste WS eingefügt
     
 # Simulation
-i = 0
-while i < len(warteschlangen):
-    while warteschlangen[i]:
-        prozess = warteschlangen[i].pop(0)
-        
-        if startzeiten [prozess['name']] is None:
-            startzeiten[prozess['name']] = zeit
+for i, (quantum, warteschlange) in enumerate (scheduling_warteschlangen): # "warteschlange" referenziert (Zeitquantum, "den Teil hier") des Tupels
+    while warteschlange: # Solange P in der WS sind
+     prozess = warteschlange.pop(0)
+    
+    # Startsignal 
+    logging.write(f'Prozess {prozess['name']} wird bearbeitet')
+    print(f"Prozess {prozess['name']} wird bearbeitet")
+    
+    # Bearbeitungsbeginn
+    cpu_zeit_vorher = prozess['cpu_time'] 
+    prozess['cpu_time'] -= quantum # CPU Zeit wird um ZQ reduziert
+    
+    # Berechnung der tatsächlichen AZ
+    ausführungs_zeit = cpu_zeit_vorher - prozess['cpu_time'] 
+    
+    # Gesamtzeit wird aktualisiert
+    zeit += ausführungs_zeit 
+    
+    # Protokollierung nach der Bearbeitung
+    logging.write(f'Prozess {prozess["name"]} bearbeitet für {ausführungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}')
+    print(f'Prozess {prozess['name']} bearbeitet für {ausführungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}')
             
-            cpu_zeit_vorher = prozess['cpu_time']
-            prozess['cpu_time'] -= zeitquanten[i] # CPU Zeit wird um Zeitquantum reduziert
-            ausführungs_zeit = min(zeitquanten[i], cpu_zeit_vorher) 
-            zeit += ausführungs_zeit # Aktuelle Zeit wird aktualisiert
+    if prozess['cpu_time'] > 0: # Überprüfen, ob der P noch CPU-Zeit hat
+            print(f"{prozess['name']} benötigt noch {prozess['cpu_time']} Sekunden")
             
-            logging.info(f'Prozess {prozess['name']} wird bearbeitet')
-            print(f"Prozess {prozess['name']} wird bearbeitet")
-            
-
-        if prozess['cpu_time'] > 0: # Überprüfen, ob der Prozess noch CPU-Zeit hat
-            if i < len(warteschlangen) -1: # Wenn ja, füge Prozess in die nächste Warteschlange ein
-                warteschlangen[i+1].append(prozess) 
-                
-                print(f"Prozess = {prozess['name']} ist jetzt in der {i + 2} Warteschlange!")
-                logdatei.info(f"Prozess {prozess ['name']} ist jetzt in der {i + 2} Warteschlange!")
-                print(f"Prozessdaten: Name = {prozess['name']}, Verbleibende CPU-Zeit = {prozess['name']}")
+            if i < len(scheduling_warteschlangen) -1: # Überprüfen, ob P sich nicht in der letzten WS befindet
+                scheduling_warteschlangen[i+1][1].append(prozess) # P wird in die nächste WS eingereiht
                 
             else:
-                warteschlangen[i].append(prozess)  # Prozess bleibt in der tiefsten Warteschlange
+                warteschlange.append(prozess) # Ansonsten bleibt P in der tiefsten WS drin
                 
-        else:
-            laufzeit[prozess['name']] = zeit - startzeiten[prozess['name']] # Gesamte Laufzeit
-            
+    else:
             # CPU Laufzeit auf 0 setzen 
             prozess['cpu_time'] = 0 
-            aktuelle_cpu_time = prozess['cpu_time']
-            
             print(f"Prozess {prozess['name']} abgeschlossen.") 
-            logdatei.info(f"Prozess {['name']} abgeschlossen.")
-            
-            print(f"Prozessdaten: Name = {prozess['name']}, Verbleibende CPU-Zeit = {aktuelle_cpu_time}")
-            
-            for j in range(len(warteschlangen)):
-                for prozess_in_warteschlange in warteschlangen[j]:
-                    if prozess_in_warteschlange['name'] != prozess['name']:
-                        gesamt_wartezeit[prozess_in_warteschlange['name']] += ausführungs_zeit
-                        
-            for prozess in prozess_liste:
-                gesamte_zeit = laufzeit[prozess['name']] + gesamt_wartezeit[prozess['name']]
-            
-    i += 1
-
-# Ausgabe der Daten
+            logging.write(f"Prozess {['name']} abgeschlossen.")
+                         
+print('Zusammenfassung der Prozessdaten:')
 for prozess in prozess_liste:
-    print(f"Prozess: {prozess['name']}, Laufzeit = {laufzeit[prozess['name']]}, Wartezeit = {gesamt_wartezeit[prozess['name']]}")
-
+    print(f"Prozess: {prozess['name']}, CPU Zeit: {[prozess['cpu_time']]}, Ankunftszeit: {[prozess['ankunftszeit']]}, "
+         f"Laufzeit: {laufzeit}, Wartezeit: {gesamt_wartezeit}, Gesamtzeit: {zeit} Sekunden")
 
 prozess_liste = lese_prozess_list(prozess_args.processlistfile)
 
@@ -174,7 +160,7 @@ max_zeit = max(prozess['ankunftszeit'] + prozess['cpu_time'] for prozess in proz
 for i, prozess in enumerate(prozess_liste) :
     achse.barh(y = i, width = prozess['cpu_time'], left = prozess['ankunftszeit'], color = "green")
 
-# Labels geändert und ticks gesetzt zur anordnung von cpu laufzeit und ankunftszeit
+# Labels geändert und Ticks gesetzt zur Anordnung von CPU Laufzeit und Ankunftszeit
 # Diagrammtitel
 plt.title("Gantt-Diagramm der Prozessverarbeitung") 
 
@@ -196,9 +182,7 @@ plt.tight_layout()
 plt.show()
 
 
-
-
-# Fehlerbehebung Logdatei
+# Fehlerbehebung Logdatei, logdatei muss automatisch erstellt werden(laut Tutor)
 # Überprüfen, ob Logdateiargument vorhanden ist 
 if log_args.logdatei: 
     logdatei = log_args.logdatei 
