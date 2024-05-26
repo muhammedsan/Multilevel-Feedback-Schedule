@@ -150,6 +150,8 @@ for prozess in prozess_liste:
 prozess_liste = lese_prozess_list(prozess_args.processlistfile)
 
 
+
+
 # Gantt-Diagramm
 fig, achse = plt.subplots()
 
@@ -160,7 +162,8 @@ max_zeit = max(prozess['ankunftszeit'] + prozess['cpu_time'] for prozess in proz
 for i, prozess in enumerate(prozess_liste) :
     achse.barh(y = i, width = prozess['cpu_time'], left = prozess['ankunftszeit'], color = "green")
 
-# Labels geändert und Ticks gesetzt zur Anordnung von CPU Laufzeit und Ankunftszeit
+
+
 # Diagrammtitel
 plt.title("Gantt-Diagramm der Prozessverarbeitung") 
 
