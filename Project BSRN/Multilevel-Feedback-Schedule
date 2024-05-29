@@ -1,14 +1,15 @@
 import argparse
 import logging
+import sys
 import matplotlib.pyplot as plt
 
 
-# Prozess für Befehlszeilenargument erstellen
+# Parser für Befehlszeilenargument erstellen
 parser = argparse.ArgumentParser(description= 'Prozessverwaltung')
 
 # Argumente definieren
-parser.add_argument('-warteschlangen', type=int, help='Anzahl der Warteschlangen')
-parser.add_argument('-quantum', type=int, required=False, help='Gebe Zeitquanten für jede Warteschlange an')
+parser.add_argument('-warteschlangen', type=int,required =False, help='Anzahl der Warteschlangen')
+parser.add_argument('-quantum', type=int, nargs='+', required=False, help='Gebe Zeitquanten für jede Warteschlange an')
 parser.add_argument('-processlistfile', type=str, help='Der Dateiname der Prozessliste')
 parser.add_argument('-logdatei', type=str, help='Der Name der Logdatei')
 parser.add_argument('-ausgabedatei', type=str, help='Der Name Ausgabedatei')
@@ -17,6 +18,46 @@ parser.add_argument('-ausgabeformat', type=str, choices=['text', 'grafisch'], he
 # Argumente auswerfen 
 args = parser.parse_args()
 
+# Dateipfad aus den Argumenten auslesen
+process_list_file = args.processlistfile
+
+# Kommandozeilenagrumente werden überprüft
+def pruefe_argumente (args):
+   if args.warteschlangen is not None:
+       if args.warteschlangen <= 0:
+           print("Fehler: Die Anzahl der Warteschlangen muss größer als 0 sein")
+           return False
+       
+   if args.quantum is not None:
+       if any(q <= 0 for q in args.quantum):
+           print("Fehler: Alle Zeitquanten müssen größer als 0 sein")        
+           return False
+       
+   if args.warteschlangen and len(args.quantum) != args.warteschlangen:
+       print("Fehler: Die Anzahl der Zeitquanten muss der Anzahl der Warteschlangen entsprechen")
+       return False
+   return True
+        
+# Argumente wurden validiert und akzeptiert    
+if pruefe_argumente(args):      
+    anzahlWS = args.warteschlangen
+    quantum = args.quantum
+
+# Interaktive Benutzeringabe falls Z.43 False
+else:
+    anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
+    while anzahlWS <= 0:
+        print("Die Anzahl der Warteschlangen muss größer als 0 sein")
+        anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an'))
+        
+    zeitquanten = []
+    for i in range(anzahlWS):
+        quantum = int(input(f'Gebe das Zeitquantum für Warteschlange {i+1} an:'))
+        while quantum <= 0:
+            print("Das Zeitquantum muss größer als 0 sein")
+            quantum = int(input(f'Gebe das Zeitquantum für Warteschlange {i+1} an:'))
+        zeitquanten.append(quantum)
+                
 # Eingaben überprüfen 
 print("\nÜberprüfen Sie Ihre Eingaben: ")
 print(f"Anzahl der Warteschlangen: {args.warteschlangen}")
@@ -25,41 +66,8 @@ print(f"Prozessliste: {args.processlistfile}")
 print(f"Logdatei: {args.logdatei}")
 print(f"Ausgabedatei: {args.ausgabedatei}")
 print(f"Ausgabeformat: {args.ausgabeformat}")
-
-
-# Dateipfad aus den Argumenten auslesen
-process_list_file = args.processlistfile
-
-# per Kommandozeilenargumente, wenn vorhanden
-if args.warteschlangen is not None and args.quantum is not None:
-     anzahlWS = args.warteschlangen
-     quantum = args.quantum
-else:
-    # Interaktive Benutzereingabe, wenn Kommandozentrale leer
-    while True: 
-     try:
-          anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
-          if anzahlWS <= 0: 
-             raise ValueError('Die Anzahl der Warteschlange muss größer als 0 sein')
-          break # Verlässt die Schleife nur bei gültiger Eingabe
-     except ValueError as e: 
-         print(e)
-        
-        
-    zeitquanten = []
-    for i in range(anzahlWS):
-        while True:
-            try:
-                quantum = int(input(f'Gebe das Zeitquantum für Warteschlange {i+1} an:'))
-                if quantum <= 0:
-                    raise ValueError('Das Zeitquantum muss größer als 0 sein')
-                zeitquanten.append(quantum)
-                break
-            except ValueError as e:
-                print(e)
-                
-                
-# Print Ausgabe
+          
+# Print Ausgabe, wenn interaktive Benutzereingabe genutzt wurde
 print('Anzahl der Warteschlangen:', anzahlWS)
 print('Zeitquantum: ',zeitquanten)
 print(f'Verwendeter Dateipfad: {process_list_file}')
@@ -96,7 +104,7 @@ logging.basicConfig(filename=args.logdatei, level=logging.INFO, format='%(asctim
 
 # Start Multilevel-Feedback-Schedule
 scheduling_warteschlangen = list(zip(zeitquanten, [[] for _ in range(anzahlWS)]))
-laufzeit = {prozess['name']: 0 for prozess in prozess_liste}  #Anfangslaufzeit = 0
+laufzeit = {prozess['name']: 0 for prozess in prozess_liste}  # Anfangslaufzeit = 0
 gesamt_wartezeit = {prozess['name']: 0 for prozess in prozess_liste}      
 zeit = 0 
 
@@ -124,7 +132,7 @@ for i, (quantum, warteschlange) in enumerate (scheduling_warteschlangen): # "war
     zeit += ausführungs_zeit 
     
     # Protokollierung nach der Bearbeitung
-    logging.info(f"Prozess {prozess["name"]} bearbeitet für {ausführungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}")
+    logging.info(f"Prozess {prozess['name']} bearbeitet für {ausführungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}")
     print(f"Prozess {prozess['name']} bearbeitet für {ausführungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}")
             
     if prozess['cpu_time'] > 0: # Überprüfen, ob der P noch CPU-Zeit hat
@@ -140,12 +148,12 @@ for i, (quantum, warteschlange) in enumerate (scheduling_warteschlangen): # "war
             # CPU Laufzeit auf 0 setzen 
             prozess['cpu_time'] = 0 
             print(f'Prozess {prozess['name']} abgeschlossen.') 
-            logging.info(f'Prozess {['name']} abgeschlossen.')
+            logging.info(f"Prozess {prozess['name']} abgeschlossen.")
                          
 print('Zusammenfassung der Prozessdaten:')
 for prozess in prozess_liste:
-    print(f"Prozess: {prozess['name']}, CPU Zeit: {[prozess['cpu_time']]}, Ankunftszeit: {[prozess['ankunftszeit']]}, "
-         f"Laufzeit: {laufzeit}, Wartezeit: {gesamt_wartezeit}, Gesamtzeit: {zeit} Sekunden")
+    print(f"Prozess: {prozess['name']}, CPU Zeit: {prozess['cpu_time']}, Ankunftszeit: {prozess['ankunftszeit']}, 
+          Laufzeit: {laufzeit}, Wartezeit: {gesamt_wartezeit}, Gesamtzeit: {zeit} Sekunden")
 
 prozess_liste = lese_prozess_list(args.processlistfile)
 
@@ -180,10 +188,15 @@ plt.show()
 
 
 # Öffnen der Ausgabedatei 
-with open(args.dateiname, 'w') as f: 
+with open(args.ausgabedatei, 'w') as f: 
    # Print der wichtigsten Informationen in die Ausgabedatei
-   f.write('Anzahl der Warteschlangen: '+anzahlWS)
-   f.write('Zeitquanten: '+zeitquanten)
+   f.write('Anzahl der Warteschlangen: {anzahlWS}\n') 
+   f.write('Zeitquanten: {zeitquanten}\n')
+   
+   # Laufzeit fehlt
+   # Wartezeiten fehlt
+   # durchschnittliche Laufzeit fehlt
+   # durchschnittliche Wartezeit fehlt
 
 print(f"Name der Ausgabedatei: {args.ausgabedatei}")
 
