@@ -3,7 +3,6 @@ import logging
 import sys
 import matplotlib.pyplot as plt
 
-
 # Parser für Befehlszeilenargument erstellen
 parser = argparse.ArgumentParser(description= 'Prozessverwaltung')
 
@@ -108,42 +107,43 @@ laufzeit = {prozess['name']: 0 for prozess in prozess_liste}  # Anfangslaufzeit 
 gesamt_wartezeit = {prozess['name']: 0 for prozess in prozess_liste}      
 zeit = 0 
 
-# P in WS1 hinzugefügt
+# Alle P werden in die erste WS eingefügt
 for prozess in prozess_liste:
     scheduling_warteschlangen[0][1].append(prozess) # P wird in die erste WS eingefügt
     
 # Simulation
-for i, (quantum, warteschlange) in enumerate (scheduling_warteschlangen): # "warteschlange" referenziert (Zeitquantum, "den Teil hier") des Tupels
-    while warteschlange: # Solange P in der WS sind
-     prozess = warteschlange.pop(0)
+def round_robin_algorithmus(scheduling_warteschlangen, quantum):
     
-    # Startsignal 
-    logging.info(f"Prozess {prozess['name']} wird bearbeitet")
-    print(f"Prozess {prozess['name']} wird bearbeitet")
+    i = 0
+    while i < len(scheduling_warteschlangen):
+        quantum, warteschlange = scheduling_warteschlangen[i]
+        while warteschlange: # Vearbeitet die aktuelle Warteschlange
+             prozess = warteschlange.pop(0)
+             cpu_zeit_vorher = prozess['cpu_time'] 
+             prozess['cpu_time'] -= min(quantum, prozess['cpu_time']) # CPU Zeit wird um ZQ reduziert
+             ausführungs_zeit = cpu_zeit_vorher - prozess['cpu_time'] 
+             zeit += ausführungs_zeit 
+             
+     
+             # Startsignal 
+             logging.info(f"Prozess {prozess['name']} wird bearbeitet")
+             print(f"Prozess {prozess['name']} wird bearbeitet")
     
-    # Bearbeitungsbeginn
-    cpu_zeit_vorher = prozess['cpu_time'] 
-    prozess['cpu_time'] -= quantum # CPU Zeit wird um ZQ reduziert
     
-    # Berechnung der tatsächlichen AZ
-    ausführungs_zeit = cpu_zeit_vorher - prozess['cpu_time'] 
-    
-    # Gesamtzeit wird aktualisiert
-    zeit += ausführungs_zeit 
-    
-    # Protokollierung nach der Bearbeitung
-    logging.info(f"Prozess {prozess['name']} bearbeitet für {ausführungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}")
-    print(f"Prozess {prozess['name']} bearbeitet für {ausführungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}")
+             # Protokollierung nach der Bearbeitung
+             logging.info(f"Prozess {prozess['name']} bearbeitet für {ausführungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}")
+             print(f"Prozess {prozess['name']} bearbeitet für {ausführungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}")
             
-    if prozess['cpu_time'] > 0: # Überprüfen, ob der P noch CPU-Zeit hat
-            print(f"{prozess['name']} benötigt noch {prozess['cpu_time']} Sekunden")
             
-            if i < len(scheduling_warteschlangen) -1: # Überprüfen, ob P sich nicht in der letzten WS befindet
-                scheduling_warteschlangen[i+1][1].append(prozess) # P wird in die nächste WS eingereiht
-                
-            else:
-                warteschlange.append(prozess) # Ansonsten bleibt P in der tiefsten WS drin
-                
+             # Überprüfen, ob der P noch CPU-Zeit hat     
+             if prozess['cpu_time'] > 0: 
+                  print(f"{prozess['name']} benötigt noch {prozess['cpu_time']} Sekunden")
+          
+                  if i < len(scheduling_warteschlangen) -1: # Überprüfen, ob P sich nicht in der letzten WS befindet
+                      scheduling_warteschlangen[i+1][1].append(prozess) # P wird in die nächste WS eingereiht
+              
+                  else: 
+                      warteschlange.append(prozess) # Ansonsten bleibt P in der tiefsten WS drin  
     else:
             # CPU Laufzeit auf 0 setzen 
             prozess['cpu_time'] = 0 
