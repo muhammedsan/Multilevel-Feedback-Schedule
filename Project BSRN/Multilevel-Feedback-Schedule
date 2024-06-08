@@ -113,7 +113,8 @@ for prozess in prozess_liste:
     
 # Simulation
 def round_robin_algorithmus(scheduling_warteschlangen, quantum):
-    
+    ausfuehrung_reihenfolge = []
+    global zeit 
     i = 0
     while i < len(scheduling_warteschlangen):
         quantum, warteschlange = scheduling_warteschlangen[i]
@@ -137,6 +138,7 @@ def round_robin_algorithmus(scheduling_warteschlangen, quantum):
             
              # Überprüfen, ob der P noch CPU-Zeit hat     
              if prozess['cpu_time'] > 0: 
+                  ausfuehrung_reihenfolge.append((prozess['name'], zeit-ausführungs_zeit, zeit, False)) # Liste enthält Prozessname, Startzeit, Endzeit, Abgeschlossen?
                   print(f"{prozess['name']} benötigt noch {prozess['cpu_time']} Sekunden")
           
                   if i < len(scheduling_warteschlangen) -1: # Überprüfen, ob P sich nicht in der letzten WS befindet
@@ -147,48 +149,61 @@ def round_robin_algorithmus(scheduling_warteschlangen, quantum):
     else:
             # CPU Laufzeit auf 0 setzen 
             prozess['cpu_time'] = 0 
+            ausfuehrung_reihenfolge.append((prozess['name'], zeit-ausführungs_zeit, zeit, True))
             print(f'Prozess {prozess['name']} abgeschlossen.') 
             logging.info(f"Prozess {prozess['name']} abgeschlossen.")
-                         
+
+    # Rückgabe ermöglicht Modularität und Weiterverarbeitung der Ausführungsreihenfolge
+    return ausfuehrung_reihenfolge         
+
+# Speichern der Prozessinformationen in ausfuehrung_reihenfolge       
+ausfuehrung_reihenfolge = round_robin_algorithmus(scheduling_warteschlangen, quantum)
+
 print('Zusammenfassung der Prozessdaten:')
 for prozess in prozess_liste:
-    print(f"Prozess: {prozess['name']}, CPU Zeit: {prozess['cpu_time']}, Ankunftszeit: {prozess['ankunftszeit']}, 
-          Laufzeit: {laufzeit}, Wartezeit: {gesamt_wartezeit}, Gesamtzeit: {zeit} Sekunden")
+    print(f"Prozess: {prozess['name']}, CPU Zeit: {prozess['cpu_time']}, Ankunftszeit: {prozess['ankunftszeit']}, Laufzeit: {laufzeit}, Wartezeit: {gesamt_wartezeit}, Gesamtzeit: {zeit} Sekunden")
 
 prozess_liste = lese_prozess_list(args.processlistfile)
 
-# Gantt-Diagramm
-fig, achse = plt.subplots()
+# Gantt Diagramm
+def erstelle_gantt_diagramm(dateiname, ausfuehrung_reihenfolge): 
+ fig, achse = plt.subplots(figsize=(10,6)) # Erstellen eines Diagramms 
+ farben = {'vollständig':'limegreen','unvollständig': 'orange'} # Dictionary für die Farbzuordnung
+ balken_hoehe = 0.4 # Höhe der Gantt Balken
 
-# Berechnen der maximalen Zeit, für die X Achse
-max_zeit = max(prozess['ankunftszeit'] + prozess['cpu_time'] for prozess in prozess_liste)
+ # Iterieren durch die Liste ausfuehrung_reihenfolge
+ for(name, start, ende, abgeschlossen) in ausfuehrung_reihenfolge: 
+     farbe = farben['unvollständig'] if abgeschlossen else farben['unvollständig'] # Farbzuweisung basierend auf dem Abschlussstatus des Prozesses
+     achse.barh(name, ende-start, left=start, height=balken_hoehe, color=farbe, edgecolor='black') # Zeichnet einen Balken für den aktuellen Prozess
 
-for i, prozess in enumerate(prozess_liste) :
-    achse.barh(y = i, width = prozess['cpu_time'], left = prozess['ankunftszeit'], color = "green")
+# Diagrammtitel 
+ plt.title("Gantt-Diagramm der Prozessverarbeitung", fontsize=14, fontweight='bold')
 
-# Diagrammtitel
-plt.title("Gantt-Diagramm der Prozessverarbeitung") 
+# Achsenbeschriftungen 
+ achse.set_xlabel('Zeit (in Sekunden)', fontsize=10)
+ achse.set_ylabel('Prozesse', fontsize=10)
 
-# X - Achsenbeschriftungen und Ticks setzen
-achse.set_xlabel('Zeit')
-achse.set_xticks(range(0,max_zeit+1))
-achse.set_xticklabels(0,max_zeit)
+ # Gitterlinien 
+ achse.grid(True, linestyle='--', linewidth=0.5, zorder=0)
 
-# Y - Achsenbeschriftungen und Ticks setzen
-achse.set_ylabel('Prozesse')
-achse.set_yticks(range(len(prozess_liste)))
-achse.set_yticklabels([prozess['name']  for prozess in prozess_liste])
+ # Legende 
+ from matplotlib.patches import Patch
+ legende = [Patch(color=farben['unvollständig'],label='Abgeschlossen'),
+            Patch(color=farben['unvollständig'], label='Unvollständig')]
+ achse.legend(handles=legende, title='Status', fontsize=10)
 
-# Gitterlinien hinzufügen
-achse.grid(True,linestyle = '-', linewidth=0.5)
-
-# Diagramm anzeigen
-plt.tight_layout()
-plt.show()
+ # Diagramm speichern und schließen 
+ plt.tight_layout()
+ plt.savefig(dateiname)
+ plt.close()
 
 
-# Öffnen der Ausgabedatei 
-with open(args.ausgabedatei, 'w') as f: 
+# Prüfen ob das Ausgabeformat 'grafisch' gewählt wurde
+if args.ausgabeformat == 'grafisch': 
+    erstelle_gantt_diagramm(args.ausgabedatei, ausfuehrung_reihenfolge) # Gantt in der Ausgabedatei speichern 
+
+else: # Falls 'text' als Ausgabeformat gewählt wurde 
+ with open(args.ausgabedatei, 'w') as f: 
    # Print der wichtigsten Informationen in die Ausgabedatei
    f.write('Anzahl der Warteschlangen: {anzahlWS}\n') 
    f.write('Zeitquanten: {zeitquanten}\n')
