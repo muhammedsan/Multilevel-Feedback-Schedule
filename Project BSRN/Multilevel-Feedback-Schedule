@@ -22,20 +22,20 @@ process_list_file = args.processlistfile
 
 # Kommandozeilenagrumente werden überprüft
 def pruefe_argumente (args):
-   if args.warteschlangen is not None:
-       if args.warteschlangen <= 0:
+   fehler = False # Variable zur Fehlererkennung initalisieren 
+   # Überprüfen, ob die Anzahl der Warteschlangen angegben und größer als 0 ist, statt verschachtelte  if-Bedingung zu verwenden
+   if args.warteschlangen is not None and args.warteschlangen <= 0:
            print("Fehler: Die Anzahl der Warteschlangen muss größer als 0 sein")
-           return False
+           fehler = True # Setzt Fehler-Variable auf True
        
-   if args.quantum is not None:
-       if any(q <= 0 for q in args.quantum):
+   if args.quantum is not None and any(q <= 0 for q in args.quantum):
            print("Fehler: Alle Zeitquanten müssen größer als 0 sein")        
-           return False
+           fehler = True 
        
    if args.warteschlangen and len(args.quantum) != args.warteschlangen:
-       print("Fehler: Die Anzahl der Zeitquanten muss der Anzahl der Warteschlangen entsprechen")
-       return False
-   return True
+           print("Fehler: Die Anzahl der Zeitquanten muss der Anzahl der Warteschlangen entsprechen")
+           fehler = True 
+   return not fehler # Rückgabe des negierten Werts der Fehler-Variable
         
 # Argumente wurden validiert und akzeptiert    
 if pruefe_argumente(args):      
