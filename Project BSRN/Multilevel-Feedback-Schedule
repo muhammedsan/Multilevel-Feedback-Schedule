@@ -26,7 +26,7 @@ def pruefe_argumente (args):
    # Überprüfen, ob die Anzahl der Warteschlangen angegben und größer als 0 ist, statt verschachtelte  if-Bedingung zu verwenden
    if args.warteschlangen is not None and args.warteschlangen <= 0:
            print("Fehler: Die Anzahl der Warteschlangen muss größer als 0 sein")
-           fehler = True # Setzt Fehler-Variable auf True
+           fehler = True 
        
    if args.quantum is not None and any(q <= 0 for q in args.quantum):
            print("Fehler: Alle Zeitquanten müssen größer als 0 sein")        
