@@ -102,66 +102,88 @@ prozess_liste = lese_prozess_list(process_list_file)
 logging.basicConfig(filename=args.logdatei, level=logging.INFO, format='%(asctime)s - %(message)s')
 
 # Start Multilevel-Feedback-Schedule
-scheduling_warteschlangen = list(zip(zeitquanten, [[] for _ in range(anzahlWS)]))
-laufzeit = {prozess['name']: 0 for prozess in prozess_liste}  # Anfangslaufzeit = 0
-gesamt_wartezeit = {prozess['name']: 0 for prozess in prozess_liste}      
+scheduling_warteschlangen = list(zip(zeitquanten, [[] for _ in range(anzahlWS)]))   # Erstellt eine Liste von "Zeitquantum, Warteschlange"-Tupeln für jede einzelne Warteschlange
+laufzeit = {prozess['name']: 0 for prozess in prozess_liste}    # Anfangslaufzeit für jeden Prozess ist 0
+gesamt_wartezeit = {prozess['name']: 0 for prozess in prozess_liste}    # Wartezeit von jedem Prozess ist zu Beginn 0
+letzte_ausfuehrungszeit = {prozess['name']: prozess['ankunftszeit'] for prozess in prozess_liste} # Anfangswert ist die Ankunftszeit des Prozesses
 zeit = 0 
 
 # Alle P werden in die erste WS eingefügt
 for prozess in prozess_liste:
-    scheduling_warteschlangen[0][1].append(prozess) # P wird in die erste WS eingefügt
+    scheduling_warteschlangen[0][1].append(prozess)
     
-# Simulation
-def round_robin_algorithmus(scheduling_warteschlangen, quantum):
-    ausfuehrung_reihenfolge = []
-    global zeit 
+# Speichert die originale CPU-Zeit jedes Prozesses
+original_cpu_time = {prozess['name']: prozess['cpu_time'] for prozess in prozess_liste} 
+    
+def update_wartezeiten(prozess, aktuelle_zeit, gesamt_wartezeit, letzte_ausfuehrungszeit):
+    wartezeit = aktuelle_zeit - letzte_ausfuehrungszeit[prozess['name']]    # Berechnet die Wartezeit des Prozesses seit der letzten Ausführung
+    gesamt_wartezeit[prozess['name']] += wartezeit  # Aktualisiert die Gesamtwartezeit des Prozesses
+    letzte_ausfuehrungszeit[prozess['name']] = aktuelle_zeit    # Aktualisiert die letzte Ausführungszeit des Prozesses auf die aktuelle Zeit
+    
+def update_laufzeiten(prozess, ausgefuehrte_zeit, laufzeit):
+    laufzeit[prozess['name']] += ausgefuehrte_zeit  # Erhöht die Laufzeit des Prozesses um die ausgeführte Zeit
+    
+def round_robin_algorithmus(scheduling_warteschlangen): 
+    ausfuehrung_reihenfolge = []    # Initialisierung der leeren Liste zur Speicherung der Ausführungsreihenfolge der Prozesse
+    global zeit
     i = 0
     while i < len(scheduling_warteschlangen):
         quantum, warteschlange = scheduling_warteschlangen[i]
         while warteschlange: # Vearbeitet die aktuelle Warteschlange
-             prozess = warteschlange.pop(0)
-             cpu_zeit_vorher = prozess['cpu_time'] 
-             prozess['cpu_time'] -= min(quantum, prozess['cpu_time']) # CPU Zeit wird um ZQ reduziert
-             ausführungs_zeit = cpu_zeit_vorher - prozess['cpu_time'] 
-             zeit += ausführungs_zeit 
+            prozess = warteschlange.pop(0)  # Entnimmt den ersten Prozess aus der Warteschlange
              
-     
-             # Startsignal 
-             logging.info(f"Prozess {prozess['name']} wird bearbeitet")
-             print(f"Prozess {prozess['name']} wird bearbeitet")
+            # Update vor Prozessauführung 
+            update_wartezeiten(prozess, zeit, gesamt_wartezeit, letzte_ausfuehrungszeit) 
     
-    
-             # Protokollierung nach der Bearbeitung
-             logging.info(f"Prozess {prozess['name']} bearbeitet für {ausführungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}")
-             print(f"Prozess {prozess['name']} bearbeitet für {ausführungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}")
+            # Reduzierung der CPU-Zeit
+            ausfuehrungs_zeit = min(quantum, prozess['cpu_time'])
+            prozess['cpu_time'] -= ausfuehrungs_zeit
+            zeit += ausfuehrungs_zeit
+             
+            # Update der Laufzeit 
+            update_laufzeiten(prozess, ausfuehrungs_zeit, laufzeit)
+            letzte_ausfuehrungszeit[prozess['name']] = zeit
+             
+            # Startsignal 
+            logging.info(f"Prozess {prozess['name']} wird bearbeitet")
+            logging.info(f"Prozess {prozess['name']} bearbeitet für {ausfuehrungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}")
             
-            
-             # Überprüfen, ob der P noch CPU-Zeit hat     
-             if prozess['cpu_time'] > 0: 
-                  ausfuehrung_reihenfolge.append((prozess['name'], zeit-ausführungs_zeit, zeit, False)) # Liste enthält Prozessname, Startzeit, Endzeit, Abgeschlossen?
-                  print(f"{prozess['name']} benötigt noch {prozess['cpu_time']} Sekunden")
-          
-                  if i < len(scheduling_warteschlangen) -1: # Überprüfen, ob P sich nicht in der letzten WS befindet
-                      scheduling_warteschlangen[i+1][1].append(prozess) # P wird in die nächste WS eingereiht
-              
-                  else: 
-                      warteschlange.append(prozess) # Ansonsten bleibt P in der tiefsten WS drin  
-    else:
-            # CPU Laufzeit auf 0 setzen 
-            prozess['cpu_time'] = 0 
-            ausfuehrung_reihenfolge.append((prozess['name'], zeit-ausführungs_zeit, zeit, True))
-            print(f'Prozess {prozess['name']} abgeschlossen.') 
-            logging.info(f"Prozess {prozess['name']} abgeschlossen.")
+            # Weiterleitung in tiefere WS    
+            if prozess['cpu_time'] > 0: 
+                # Hinzufügung von wichtigen Informationen wie zum Beispiel Name, Startpunkt und Endzeit in die leere Liste
+                ausfuehrung_reihenfolge.append((prozess['name'], zeit-ausfuehrungs_zeit, zeit, False))
+                     
+                # Überprüfung auf tiefere Warteschlangen          
+                if i < len(scheduling_warteschlangen) - 1:
+                    scheduling_warteschlangen[i+1][1].append(prozess)   # Prozess wird tieferen Warteschlange hinzugefügt
+                    
+                else: 
+                    warteschlange.append(prozess)   # Prozess bleibt in der selben Warteschlange
+                    
+            else:
+                ausfuehrung_reihenfolge.append((prozess['name'], zeit-ausfuehrungs_zeit, zeit, True))
+                laufzeit[prozess['name']] = zeit
+                logging.info(f"Prozess {prozess['name']} abgeschlossen.")
 
-    # Rückgabe ermöglicht Modularität und Weiterverarbeitung der Ausführungsreihenfolge
-    return ausfuehrung_reihenfolge         
+        i += 1
+        
+    return ausfuehrung_reihenfolge
 
-# Speichern der Prozessinformationen in ausfuehrung_reihenfolge       
-ausfuehrung_reihenfolge = round_robin_algorithmus(scheduling_warteschlangen, quantum)
+# Aufruf der Funktion
+ausfuehrung_reihenfolge = round_robin_algorithmus(scheduling_warteschlangen)
 
 print('Zusammenfassung der Prozessdaten:')
 for prozess in prozess_liste:
-    print(f"Prozess: {prozess['name']}, CPU Zeit: {prozess['cpu_time']}, Ankunftszeit: {prozess['ankunftszeit']}, Laufzeit: {laufzeit}, Wartezeit: {gesamt_wartezeit}, Gesamtzeit: {zeit} Sekunden")
+    print(f"Prozess: {prozess['name']}, Original CPU Zeit: {original_cpu_time[prozess['name']]}, "
+          f"Aktuelle CPU Zeit: {prozess['cpu_time']}, Ankunftszeit: {prozess['ankunftszeit']}, "
+          f"Laufzeit: {laufzeit[prozess['name']]}, Wartezeit: {gesamt_wartezeit[prozess['name']]}")
+
+# Durchschnittliche Laufzeit und Wartezeit berechnen
+durchschnittliche_laufzeit = sum(laufzeit[prozess['name']] - prozess['ankunftszeit'] for prozess in prozess_liste) / len(prozess_liste)
+durchschnittliche_wartezeit = sum(gesamt_wartezeit[prozess['name']] for prozess in prozess_liste) / len(prozess_liste)
+
+print(f"Durchschnittliche Laufzeit: {durchschnittliche_laufzeit}")
+print(f"Durchschnittliche Wartezeit: {durchschnittliche_wartezeit}")
 
 prozess_liste = lese_prozess_list(args.processlistfile)
 
