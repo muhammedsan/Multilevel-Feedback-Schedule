@@ -226,24 +226,25 @@ def erstelle_gantt_diagramm(dateiname, ausfuehrung_reihenfolge):
  plt.savefig(dateiname)
  plt.close()
 
+# Öffnen der Ausgabedatei und schreiben der Prozessinformationen
+with open(args.ausgabedatei,'w') as f:
+    # Schreiben der Anzahl der Warteschlangen und der Zeitquanten in die Ausgabedatei
+    f.write('Anzahl der Warteschlangen: {}\n'.format(anzahlWS))
+    f.write('Zeitquanten: {}\n'.format(zeitquanten))
+    # Überschrift für die Prozessinformationen schreiben
+    f.write('Laufzeiten und Wartezeiten für jeden Prozess:\n')
+    # Schleife durch die Prozessliste zum Schreiben der Prozessdetails
+    for prozess in prozess_liste:
+        f.write('Prozess: {}, CPU Zeit: {}, Ankunftszeit: {}, Laufzeit: {}, Wartezeit: {}, Gesamtzeit: {}\n'.format(
+            prozess['name'], prozess['cpu_time'], prozess['ankunftszeit'],
+            laufzeit[prozess['name']], gesamt_wartezeit[prozess['name']], zeit))
+    # Schreiben der durchschnittlichen Laufzeit und Wartezeit in die Ausgabedatei
+    f.write('Durchschnittliche Laufzeit: {:.2f} Sekunden\n'.format(durchschnittliche_laufzeit))
+    f.write('Durchschnittliche Wartezeit: {:.2f} Sekunden\n'.format(durchschnittliche_wartezeit))
 
 # Prüfen ob das Ausgabeformat 'grafisch' gewählt wurde
 if args.ausgabeformat == 'grafisch': 
     erstelle_gantt_diagramm(args.ausgabedatei, ausfuehrung_reihenfolge) # Gantt in der Ausgabedatei speichern 
-
-else: # Falls 'text' als Ausgabeformat gewählt wurde 
- with open(args.ausgabedatei, 'w') as f: 
-   # Print der wichtigsten Informationen in die Ausgabedatei
-   f.write('Anzahl der Warteschlangen: {anzahlWS}\n') 
-   f.write('Zeitquanten: {zeitquanten}\n')
-   
-   # Laufzeit fehlt
-   # Wartezeiten fehlt
-   # durchschnittliche Laufzeit fehlt
-   # durchschnittliche Wartezeit fehlt
-
-print(f"Name der Ausgabedatei: {args.ausgabedatei}")
-
 
 
 
