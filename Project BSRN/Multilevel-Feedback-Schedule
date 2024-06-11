@@ -1,6 +1,5 @@
 import argparse
 import logging
-import sys
 import matplotlib.pyplot as plt
 
 # Parser für Befehlszeilenargument erstellen
@@ -11,14 +10,16 @@ parser.add_argument('-warteschlangen', type=int,required =False, help='Anzahl de
 parser.add_argument('-quantum', type=int, nargs='+', required=False, help='Gebe Zeitquanten für jede Warteschlange an')
 parser.add_argument('-processlistfile', type=str, help='Der Dateiname der Prozessliste')
 parser.add_argument('-logdatei', type=str, help='Der Name der Logdatei')
-parser.add_argument('-ausgabedatei', type=str, help='Der Name Ausgabedatei')
 parser.add_argument('-ausgabeformat', type=str, choices=['text', 'grafisch'], help='Das Ausgabeformat text oder grafisch')
+parser.add_argument('-ausgabedatei', type=str, help='Der Name Ausgabedatei')
 
 # Argumente auswerfen 
 args = parser.parse_args()
 
 # Dateipfad aus den Argumenten auslesen
 process_list_file = args.processlistfile
+
+zeitquanten = [] 
 
 # Kommandozeilenagrumente werden überprüft
 def pruefe_argumente (args):
@@ -74,8 +75,8 @@ else:
     print(f"Quanten: {args.quantum}")
     print(f"Prozessliste: {args.processlistfile}")
     print(f"Logdatei: {args.logdatei}")
-    print(f"Ausgabedatei: {args.ausgabedatei}")
     print(f"Ausgabeformat: {args.ausgabeformat}")
+    print(f"Ausgabedatei: {args.ausgabedatei}")
 
 
 # Methode zum Einlesen der Prozesse
@@ -89,7 +90,7 @@ def lese_prozess_list(dateiname):
                    # Dictionary 
                    prozess = {
                        'name': parts[0],
-                       'cpu_time': int(parts[1]),
+                       'cpu_zeit': int(parts[1]),
                        'ankunftszeit': int(parts[2])
                 }
                prozesse.append(prozess)
@@ -119,7 +120,7 @@ for prozess in prozess_liste:
     scheduling_warteschlangen[0][1].append(prozess)
     
 # Speichert die originale CPU-Zeit jedes Prozesses
-original_cpu_time = {prozess['name']: prozess['cpu_time'] for prozess in prozess_liste} 
+original_cpu_time = {prozess['name']: prozess['cpu_zeit'] for prozess in prozess_liste} 
     
 def update_wartezeiten(prozess, aktuelle_zeit, gesamt_wartezeit, letzte_ausfuehrungszeit):
     wartezeit = aktuelle_zeit - letzte_ausfuehrungszeit[prozess['name']]    # Berechnet die Wartezeit des Prozesses seit der letzten Ausführung
@@ -142,8 +143,8 @@ def round_robin_algorithmus(scheduling_warteschlangen):
             update_wartezeiten(prozess, zeit, gesamt_wartezeit, letzte_ausfuehrungszeit) 
     
             # Reduzierung der CPU-Zeit
-            ausfuehrungs_zeit = min(quantum, prozess['cpu_time'])
-            prozess['cpu_time'] -= ausfuehrungs_zeit
+            ausfuehrungs_zeit = min(quantum, prozess['cpu_zeit'])
+            prozess['cpu_zeit'] -= ausfuehrungs_zeit
             zeit += ausfuehrungs_zeit
              
             # Update der Laufzeit 
@@ -152,10 +153,10 @@ def round_robin_algorithmus(scheduling_warteschlangen):
              
             # Startsignal 
             logging.info(f"Prozess {prozess['name']} wird bearbeitet")
-            logging.info(f"Prozess {prozess['name']} bearbeitet für {ausfuehrungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_time']}")
+            logging.info(f"Prozess {prozess['name']} bearbeitet für {ausfuehrungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_zeit']}")
             
             # Weiterleitung in tiefere WS    
-            if prozess['cpu_time'] > 0: 
+            if prozess['cpu_zeit'] > 0: 
                 # Hinzufügung von wichtigen Informationen wie zum Beispiel Name, Startpunkt und Endzeit in die leere Liste
                 ausfuehrung_reihenfolge.append((prozess['name'], zeit-ausfuehrungs_zeit, zeit, False))
                      
@@ -181,7 +182,7 @@ ausfuehrung_reihenfolge = round_robin_algorithmus(scheduling_warteschlangen)
 print('Zusammenfassung der Prozessdaten:')
 for prozess in prozess_liste:
     print(f"Prozess: {prozess['name']}, Original CPU Zeit: {original_cpu_time[prozess['name']]}, "
-          f"Aktuelle CPU Zeit: {prozess['cpu_time']}, Ankunftszeit: {prozess['ankunftszeit']}, "
+          f"Aktuelle CPU Zeit: {prozess['cpu_zeit']}, Ankunftszeit: {prozess['ankunftszeit']}, "
           f"Laufzeit: {laufzeit[prozess['name']]}, Wartezeit: {gesamt_wartezeit[prozess['name']]}")
 
 # Durchschnittliche Laufzeit und Wartezeit berechnen
@@ -201,7 +202,7 @@ def erstelle_gantt_diagramm(dateiname, ausfuehrung_reihenfolge):
 
  # Iterieren durch die Liste ausfuehrung_reihenfolge
  for(name, start, ende, abgeschlossen) in ausfuehrung_reihenfolge: 
-     farbe = farben['unvollständig'] if abgeschlossen else farben['unvollständig'] # Farbzuweisung basierend auf dem Abschlussstatus des Prozesses
+     farbe = farben['vollständig'] if abgeschlossen else farben['unvollständig'] # Farbzuweisung basierend auf dem Abschlussstatus des Prozesses
      achse.barh(name, ende-start, left=start, height=balken_hoehe, color=farbe, edgecolor='black') # Zeichnet einen Balken für den aktuellen Prozess
 
 # Diagrammtitel 
@@ -216,7 +217,7 @@ def erstelle_gantt_diagramm(dateiname, ausfuehrung_reihenfolge):
 
  # Legende 
  from matplotlib.patches import Patch
- legende = [Patch(color=farben['unvollständig'],label='Abgeschlossen'),
+ legende = [Patch(color=farben['vollständig'],label='Abgeschlossen'),
             Patch(color=farben['unvollständig'], label='Unvollständig')]
  achse.legend(handles=legende, title='Status', fontsize=10)
 
