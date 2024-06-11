@@ -36,40 +36,46 @@ def pruefe_argumente (args):
            print("Fehler: Die Anzahl der Zeitquanten muss der Anzahl der Warteschlangen entsprechen")
            fehler = True 
    return not fehler # Rückgabe des negierten Werts der Fehler-Variable
-        
-# Argumente wurden validiert und akzeptiert    
-if pruefe_argumente(args):      
-    anzahlWS = args.warteschlangen
-    quantum = args.quantum
 
-# Interaktive Benutzeringabe falls Z.43 False
-else:
+# Variable zur Feststellung, ob interaktive Eingaben benötigt werden
+interaktive_eingabe = False
+
+# Argumente wurden validiert und akzeptiert    
+if not pruefe_argumente(args):   
+    # Wenn die Argumente nicht gültig sind, wird die interaktive Eingabe auf True gesetzt
+    interaktive_eingabe = True   
     anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an: '))
     while anzahlWS <= 0:
         print("Die Anzahl der Warteschlangen muss größer als 0 sein")
         anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an'))
-        
-    zeitquanten = []
+
+
     for i in range(anzahlWS):
         quantum = int(input(f'Gebe das Zeitquantum für Warteschlange {i+1} an:'))
         while quantum <= 0:
             print("Das Zeitquantum muss größer als 0 sein")
             quantum = int(input(f'Gebe das Zeitquantum für Warteschlange {i+1} an:'))
         zeitquanten.append(quantum)
-                
-# Eingaben überprüfen 
-print("\nÜberprüfen Sie Ihre Eingaben: ")
-print(f"Anzahl der Warteschlangen: {args.warteschlangen}")
-print(f"Quanten: {args.quantum}")
-print(f"Prozessliste: {args.processlistfile}")
-print(f"Logdatei: {args.logdatei}")
-print(f"Ausgabedatei: {args.ausgabedatei}")
-print(f"Ausgabeformat: {args.ausgabeformat}")
-          
-# Print Ausgabe, wenn interaktive Benutzereingabe genutzt wurde
-print('Anzahl der Warteschlangen:', anzahlWS)
-print('Zeitquantum: ',zeitquanten)
-print(f'Verwendeter Dateipfad: {process_list_file}')
+else:
+    # Argumentwerte aus Kommandozeile verwenden, wenn sie gültig sind
+    anzahlWS = args.warteschlangen 
+    zeitquanten = args.quantum
+
+if interaktive_eingabe:
+    # Ausgabe der Eingaben, wenn sie interaktiv eingegeben wurden
+    print('Anzahl der Warteschlangen:', anzahlWS)
+    print('Zeitquantum: ',zeitquanten)
+    print(f'Verwendeter Dateipfad: {process_list_file}')    
+    
+else:
+    # Überprüfung und Ausgabe der Eingaben, wenn sie über Kommandozeilenargumente eingegeben wurden
+    print("\nÜberprüfen Sie Ihre Eingaben: ")
+    print(f"Anzahl der Warteschlangen: {args.warteschlangen}")
+    print(f"Quanten: {args.quantum}")
+    print(f"Prozessliste: {args.processlistfile}")
+    print(f"Logdatei: {args.logdatei}")
+    print(f"Ausgabedatei: {args.ausgabedatei}")
+    print(f"Ausgabeformat: {args.ausgabeformat}")
 
 
 # Methode zum Einlesen der Prozesse
