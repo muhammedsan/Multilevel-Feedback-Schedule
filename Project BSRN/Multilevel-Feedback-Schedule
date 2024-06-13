@@ -229,17 +229,17 @@ def erstelle_gantt_diagramm(dateiname, ausfuehrung_reihenfolge):
 if args.ausgabeformat== 'text': 
 # Öffnen der Ausgabedatei und schreiben der Prozessinformationen
     with open(args.ausgabedatei,'w') as f:
-     f.write('Anzahl der Warteschlangen: {}\n'.format(anzahlWS))
-     f.write('Zeitquanten: {}\n'.format(zeitquanten))
+        f.write('Anzahl der Warteschlangen: {}\n'.format(anzahlWS))
+        f.write('Zeitquanten: {}\n'.format(zeitquanten))
      # Überschrift für die Prozessinformationen schreiben
-     f.write('Laufzeiten und Wartezeiten für jeden Prozess:\n')
+        f.write('Laufzeiten und Wartezeiten für jeden Prozess:\n')
      # Schleife durch die Prozessliste zum Schreiben der Prozessdetails
-     for prozess in prozess_liste:
-        f.write('Prozess: {}, CPU Zeit: {}, Ankunftszeit: {}, Laufzeit: {}, Wartezeit: {}, Gesamtzeit: {}\n'.format(
-            prozess['name'], prozess['cpu_time'], prozess['ankunftszeit'],
-            laufzeit[prozess['name']], gesamt_wartezeit[prozess['name']], zeit))
-    f.write('Durchschnittliche Laufzeit: {:.2f} Sekunden\n'.format(durchschnittliche_laufzeit))
-    f.write('Durchschnittliche Wartezeit: {:.2f} Sekunden\n'.format(durchschnittliche_wartezeit))
+        for prozess in prozess_liste:
+            f.write('Prozess: {}, CPU Zeit: {}, Ankunftszeit: {}, Laufzeit: {}, Wartezeit: {}, Gesamtzeit: {}\n'.format(
+                prozess['name'], prozess['cpu_time'], prozess['ankunftszeit'],
+                laufzeit[prozess['name']], gesamt_wartezeit[prozess['name']], zeit))
+        f.write('Durchschnittliche Laufzeit: {:.2f} Sekunden\n'.format(durchschnittliche_laufzeit))
+        f.write('Durchschnittliche Wartezeit: {:.2f} Sekunden\n'.format(durchschnittliche_wartezeit))
 
 else: 
    erstelle_gantt_diagramm(args.ausgabedatei, ausfuehrung_reihenfolge) # Gantt-Diagramm in der Ausgabedatei speichern 
