@@ -43,8 +43,7 @@ if not pruefe_argumente(args):
     while anzahlWS <= 0:
         print("Die Anzahl der Warteschlangen muss größer als 0 sein")
         anzahlWS = int(input('Gebe die Anzahl der Warteschlangen an'))
-
-
+ 
     for i in range(anzahlWS):
         quantum = int(input(f'Gebe das Zeitquantum für Warteschlange {i+1} an:'))
         while quantum <= 0:
@@ -110,10 +109,22 @@ original_cpu_zeit = {prozess['name']: prozess['cpu_zeit'] for prozess in prozess
 zeit = 0 
 
 def update_wartezeiten(prozess, zeit):
-    # Nur die Wartezeit berechnen, wenn der Prozess bereits auf der CPU war!
-    if letzter_cpu_zugriff[prozess['name']] != prozess['ankunftszeit']:
-        wartezeit = zeit - letzter_cpu_zugriff[prozess['name']]
-        gesamt_wartezeit[prozess['name']] += wartezeit
+    # Prüfe, ob der P warten musste, bevor er bearbeitet wird
+    if zeit > prozess['ankuntfszeit']:
+        
+        if letzter_cpu_zugriff[prozess['name']] < prozess['ankunftszeit']:
+            # Der P hat noch nie die CPU betreten
+            wartezeit = zeit - prozess['ankunftszeit']
+            
+        else: 
+            # der P war bereits auf der CPU und wartet auf die erneute Zuteilung
+            wartezeit = zeit - letzter_cpu_zugriff[prozess['name']]
+            gesamt_wartezeit[prozess['name']] += wartezeit
+            letzter_cpu_zugriff[prozess['name']] = zeit + prozess['cpu_zeit']
+            
+    else:
+        # Es gibt keine Wartezeit zu erfassen, da der P sofort bearbeitet wird
+        letzter_cpu_zugriff[prozess['name']] = zeit
 
 def update_laufzeiten(prozess, ausgefuehrte_zeit):
     laufzeit[prozess['name']] += ausgefuehrte_zeit
@@ -131,24 +142,28 @@ def round_robin_algorithmus(scheduling_warteschlangen):
         while warteschlange: # Verarbeitet die aktuelle WS
             prozess = warteschlange.pop(0) # P wird aus WS entfernt
 
-            logging.info(f"Prozess {prozess['name']} wird aus der Warteschlange genommen. Aktuelle Zeit: {zeit}")
+            logging.info(f"Prozess {prozess['name']} wird aus der Warteschlange genommen")
+            logging.info(f"Aktuelle Zeit: {zeit}")
              
-            alte_wartezeit = gesamt_wartezeit[prozess['name']]
+            alte_wartezeit = gesamt_wartezeit[prozess['name']] # Zur detaillierten Protokollierung, um Fehler zu erkennen
             update_wartezeiten(prozess, zeit)
-            logging.info(f"Wartezeit für {prozess['name']} aktualisiert von {alte_wartezeit} zu {gesamt_wartezeit[prozess['name']]} aufgrund von {zeit} - {letzter_cpu_zugriff[prozess['name']]}")
+            logging.info(f"Wartezeit für {prozess['name']} aktualisiert von {alte_wartezeit} zu {gesamt_wartezeit[prozess['name']]}") # Zur detaillierten Protokollierung, um Fehler zu erkennen
+            
+            # Startsignal 
+            logging.info(f"Prozess {prozess['name']} wird bearbeitet")
 
-            # Reduzierung der CPU-Zeit
+            # Wähle den kleineren Wert !
             ausfuehrungs_zeit = min(quantum, prozess['cpu_zeit'])
+            
+            # Reduzierung der CPU-Zeit
             prozess['cpu_zeit'] -= ausfuehrungs_zeit
+            logging.info(f"Prozess {prozess['name']} bearbeitet für {ausfuehrungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_zeit']}")
+            
             zeit += ausfuehrungs_zeit
             logging.info(f"Letzter CPU-Zugriff für {prozess['name']} auf Zeit {zeit} gesetzt")
              
             # Aktualisiere letzter_cpu_zugriff nach Wartezeitberechnung!
             letzter_cpu_zugriff[prozess['name']] = zeit
-             
-            # Startsignal 
-            logging.info(f"Prozess {prozess['name']} wird bearbeitet")
-            logging.info(f"Prozess {prozess['name']} bearbeitet für {ausfuehrungs_zeit} Sekunden. Verbleibende CPU-Zeit: {prozess['cpu_zeit']}")
             logging.info(f"Prozess {prozess['name']} Wartezeit: {gesamt_wartezeit}")
 
             # Update der Laufzeit
